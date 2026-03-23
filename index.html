@@ -1,990 +1,910 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>AI Editorial Studio | Powered by Pollinations</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
-<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Montserrat','sans-serif'],serif:['Cormorant Garamond','serif']},colors:{cream:'#F9F9F6',ink:'#0A0A0A'}}}}</script>
-<style>
-html{scroll-behavior:smooth}
-body{background:#050505;color:#fff;overflow-x:hidden}
-.video-bg{position:fixed;right:0;bottom:0;min-width:100%;min-height:100%;z-index:-2;object-fit:cover;opacity:.45;filter:grayscale(30%) contrast(120%)}
-.video-overlay{position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(5,5,5,.4) 0%,rgba(5,5,5,.97) 100%)}
-.luxury-input{background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.2);color:#fff;font-family:'Cormorant Garamond',serif;font-size:2.2rem;width:100%;padding:.5rem 0;transition:border .4s;border-radius:0}
-.luxury-input:focus{outline:none;border-bottom:1px solid #fff}
-.luxury-input::placeholder{color:rgba(255,255,255,.14)}
-.lux-sm{font-size:1.1rem}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Editorial Studio | Powered by Pollinations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Ultra-Premium Typography: Cormorant (Serif) & Montserrat (Sans) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans:['Montserrat', 'sans-serif'],
+                        serif: ['Cormorant Garamond', 'serif'],
+                    },
+                    colors: {
+                        cream: '#F9F9F6',
+                        ink: '#0A0A0A',
+                    }
+                }
+            }
+        }
+    </script>
 
-/* Split screen */
-#output-area{display:flex;transition:all .6s cubic-bezier(.77,0,.175,1)}
-#book-outer{flex:1 1 100%;transition:flex .6s cubic-bezier(.77,0,.175,1);min-width:0}
-#critique-panel{flex:0 0 0%;overflow:hidden;transition:flex .6s cubic-bezier(.77,0,.175,1);background:#08080a;display:flex;flex-direction:column}
-#critique-panel.open{flex:0 0 42%}
-#book-outer.split{flex:0 0 58%}
-#critique-inner{padding:2.5rem 2rem;overflow-y:auto;height:100%;border-left:1px solid rgba(255,255,255,.07)}
-#critique-inner::-webkit-scrollbar{width:3px}
-#critique-inner::-webkit-scrollbar-thumb{background:#2a2a2a}
-.score-ring{width:110px;height:110px;border-radius:50%;background:conic-gradient(#fff calc(var(--score)*36deg),#1a1a1a 0deg);display:flex;align-items:center;justify-content:center;position:relative}
-.score-ring::before{content:'';position:absolute;width:84px;height:84px;border-radius:50%;background:#08080a}
-.score-ring span{position:relative;z-index:1;font-family:'Cormorant Garamond',serif;font-size:2rem;color:#fff}
+    <style>
+        /* Base Resets & Smoothness */
+        html { scroll-behavior: smooth; }
+        body { background-color: #050505; color: #ffffff; overflow-x: hidden; }
+        
+        /* The $200k Video Background Technique */
+        .video-bg {
+            position: fixed; right: 0; bottom: 0;
+            min-width: 100%; min-height: 100%;
+            width: auto; height: auto; z-index: -2;
+            object-fit: cover; opacity: 0.5;
+            filter: grayscale(30%) contrast(120%);
+        }
+        .video-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            background: linear-gradient(180deg, rgba(5,5,5,0.4) 0%, rgba(5,5,5,0.95) 100%);
+        }
 
-/* Magazine */
-.magazine-wrapper{background:#F9F9F6;color:#0A0A0A}
-.magazine-page{page-break-after:always;padding:5rem 3.5rem;max-width:1200px;margin:0 auto;min-height:100vh}
-.formatted-content{column-count:2;column-gap:3.5rem;text-align:justify}
-.formatted-content p{font-family:'Montserrat',sans-serif;font-size:.92rem;line-height:2;margin-bottom:1.4rem;font-weight:300;color:#222}
-.formatted-content>p:first-of-type::first-letter{float:left;font-size:6rem;line-height:.7;padding-top:8px;padding-right:10px;font-family:'Cormorant Garamond',serif;color:#0A0A0A}
-.formatted-content h3{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:#000;margin:2rem 0 1rem;border-bottom:1px solid #ddd;padding-bottom:.5rem;column-span:all}
-.formatted-content ul,.formatted-content ol{font-family:'Montserrat',sans-serif;margin-left:1rem;margin-bottom:2rem;color:#333;font-size:.92rem;line-height:2;font-weight:300}
-.formatted-content strong{font-weight:500;color:#000}
+        /* Swiss Luxury Inputs */
+        .luxury-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            color: #ffffff;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            width: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.4s ease;
+            border-radius: 0;
+        }
+        .luxury-input:focus {
+            outline: none;
+            border-bottom: 1px solid rgba(255,255,255,1);
+            background: transparent;
+        }
+        .luxury-input::placeholder { color: rgba(255,255,255,0.15); }
 
-/* Buttons */
-.action-btn{font-size:.6rem;font-family:'Montserrat',sans-serif;letter-spacing:.2em;text-transform:uppercase;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);background:transparent;padding:.55rem 1.3rem;cursor:pointer;transition:all .3s}
-.action-btn:hover{border-color:rgba(255,255,255,.7);color:#fff}
-.action-btn:disabled{opacity:.3;pointer-events:none}
-.action-btn.toggled{border-color:#fff;color:#fff;background:rgba(255,255,255,.05)}
-.regen-btn{font-family:'Montserrat',sans-serif;font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:#888;border:1px solid #ddd;background:transparent;padding:.4rem 1rem;cursor:pointer;transition:all .3s;float:right}
-.regen-btn:hover{color:#000;border-color:#000}
-.regen-btn:disabled{opacity:.35;pointer-events:none}
-.translate-input{font-family:'Montserrat',sans-serif;font-size:.62rem;letter-spacing:.15em;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.2);color:#fff;padding:.3rem .4rem;width:120px;outline:none;text-transform:uppercase}
-.translate-input::placeholder{color:rgba(255,255,255,.3);text-transform:none}
+        /* The Output: Print Magazine Styling */
+        .magazine-wrapper { background: #F9F9F6; color: #0A0A0A; }
+        .magazine-page { page-break-after: always; padding: 6rem 4rem; max-width: 1200px; margin: 0 auto; min-height: 100vh; }
+        
+        .formatted-content {
+            column-count: 2;
+            column-gap: 4rem;
+            text-align: justify;
+        }
+        
+        .formatted-content p { font-family: 'Montserrat', sans-serif; font-size: 0.95rem; line-height: 2; margin-bottom: 1.5rem; font-weight: 300; color: #222; }
+        
+        /* Massive Drop Cap for the first paragraph */
+        .formatted-content > p:first-of-type::first-letter { 
+            float: left; font-size: 6.5rem; line-height: 0.7; padding-top: 8px; padding-right: 12px; 
+            font-family: 'Cormorant Garamond', serif; font-weight: 400; color: #0A0A0A; 
+        }
+        
+        .formatted-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 400; color: #000; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid #ddd; padding-bottom: 0.5rem; column-span: all; }
+        .formatted-content ul, .formatted-content ol { font-family: 'Montserrat', sans-serif; margin-left: 1rem; margin-bottom: 2rem; color: #333; font-size: 0.95rem; line-height: 2; font-weight: 300;}
+        .formatted-content li { margin-bottom: 0.5rem; }
+        .formatted-content strong { font-weight: 500; color: #000; }
 
-/* Pollen error */
-@keyframes errFlash{0%,100%{background:transparent}50%{background:rgba(239,68,68,.08)}}
-.err-flash{animation:errFlash .4s ease 0s 3}
+        /* Split Screen Animation */
+        #workspace-container { display: flex; width: 100%; transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
+        #book-container { transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
+        #critique-panel { transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
 
-/* Modal */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
-.modal-box{background:#0d0d0d;border:1px solid rgba(255,255,255,.1);max-width:680px;width:90%;max-height:90vh;overflow-y:auto;padding:3rem}
-.modal-box::-webkit-scrollbar{width:3px}
-.modal-box::-webkit-scrollbar-thumb{background:#333}
+        /* Custom minimal scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; }
 
-/* Pollinations mark */
-.pol-mark{display:inline-flex;align-items:center;gap:.35rem;text-decoration:none}
-.pol-mark svg{width:18px;height:18px;opacity:.65;transition:opacity .3s}
-.pol-mark:hover svg{opacity:1}
+        @media print { 
+            .no-print, .video-bg, .video-overlay, #critique-panel { display: none !important; }
+            body, .magazine-wrapper { background: white !important; color: black !important; }
+            .magazine-page { padding: 0; max-width: 100%; margin: 0; }
+            .formatted-content { column-count: 2; column-gap: 3rem; }
+            #book-container { width: 100% !important; }
+        }
 
-/* Progress bar */
-.prog-track{height:2px;background:rgba(255,255,255,.08);width:100%;border-radius:1px}
-.prog-bar{height:2px;background:#fff;border-radius:1px;transition:width .5s ease;width:0%}
-
-/* Tier notice pill */
-.tier-pill{font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;border:1px solid;padding:.25rem .7rem;font-family:'Montserrat',sans-serif}
-.tier-seed{color:#a3e635;border-color:#a3e635}
-.tier-spore{color:#94a3b8;border-color:#94a3b8}
-
-/* Audiobook panel */
-.audio-player{background:#111;border:1px solid rgba(255,255,255,.08);padding:1.5rem 2rem}
-audio{width:100%;margin-top:.5rem;accent-color:#fff}
-audio::-webkit-media-controls-panel{background:#111}
-
-/* Cover frame */
-.cover-frame{aspect-ratio:2/3;background:#111;border:1px solid rgba(255,255,255,.1);overflow:hidden;position:relative}
-.cover-frame img{width:100%;height:100%;object-fit:cover}
-
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.pulse-text{animation:pulse 2s infinite}
-
-@media print{.no-print,.video-bg,.video-overlay{display:none!important}body,.magazine-wrapper{background:#fff!important;color:#000!important}.magazine-page{padding:0;max-width:100%;margin:0}}
-</style>
+        /* Glitch/Pulse animation for loading states */
+        .pulse-text { animation: pulseOpacity 2s infinite; }
+        @keyframes pulseOpacity { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    </style>
 </head>
-<body class="antialiased min-h-screen relative">
+<body class="antialiased min-h-screen relative selection:bg-white selection:text-black">
 
-<!-- VIDEO BG -->
-<video autoplay loop muted playsinline class="video-bg no-print">
-  <source src="https://cdn.coverr.co/videos/coverr-dark-abstract-waves-2641/1080p.mp4" type="video/mp4">
-</video>
-<div class="video-overlay no-print"></div>
+    <!-- Cinematic Video Background (Abstract Dark Fluid) -->
+    <video autoplay loop muted playsinline class="video-bg no-print">
+        <source src="https://cdn.coverr.co/videos/coverr-dark-abstract-waves-2641/1080p.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay no-print"></div>
 
-<!-- ============ TERMS OF SERVICE MODAL ============ -->
-<div id="tos-modal" class="modal-bg no-print">
-  <div class="modal-box">
-    <div class="flex items-center gap-3 mb-6">
-      <img src="https://raw.githubusercontent.com/pollinations/pollinations/main/assets/logo.svg" alt="Pollinations" style="width:22px;height:22px;opacity:.8;filter:invert(1)">
-      <h2 class="text-sm font-sans tracking-[.3em] uppercase text-white">AI Editorial Studio</h2>
-    </div>
-    <h3 class="text-3xl font-serif text-white mb-2">Terms of Service &amp; Usage Agreement</h3>
-    <p class="text-[.6rem] font-sans tracking-[.2em] uppercase text-white/40 mb-8">Effective: March 2026</p>
+    <!-- Terms of Service Modal -->
+    <div id="tos-modal" class="hidden fixed inset-0 z-[100] bg-black/90 flex justify-center items-center backdrop-blur-sm p-4">
+        <div class="bg-ink border border-white/20 max-w-2xl w-full p-12 relative max-h-[90vh] overflow-y-auto">
+            <button id="close-tos" class="absolute top-6 right-6 text-white text-3xl hover:text-white/60 transition-colors">&times;</button>
+            <h2 class="text-3xl font-serif mb-6 uppercase tracking-widest text-center text-white">Terms of Service & Usage Guidance</h2>
+            <div class="font-sans text-sm font-light leading-loose text-white/80 space-y-6">
+                <p>Welcome to the AI Editorial Studio. By utilizing this platform, you interact with parameters of luxury editorial generation, powered seamlessly by Pollinations AI.</p>
+                
+                <h3 class="text-lg text-white tracking-widest border-b border-white/20 pb-2 uppercase">Platform Mechanics</h3>
+                <p>Every generation, translation, critique, and targeted regeneration consumes <em>Pollen</em>. This abstract currency ensures the ecosystem operates at peak performance.</p>
+                
+                <h3 class="text-lg text-white tracking-widest border-b border-white/20 pb-2 uppercase">Tier Guidance</h3>
+                <div class="p-6 bg-white/5 border border-white/10">
+                    <p class="mb-2 uppercase tracking-widest text-white"><strong class="font-semibold text-green-400">RECOMMENDED: SEED Tier</strong></p>
+                    <p class="mb-6">We highly recommend upgrading to the SEED tier for the ultimate experience. This provides full access to premium features, high-fidelity synthesis, and an unrestricted creative canvas.</p>
+                    <p class="mb-2 uppercase tracking-widest text-white"><strong class="font-semibold text-gray-400">SPORE Tier</strong></p>
+                    <p>The SPORE tier is heavily limited. It serves only as a basic introduction; usage is restricted and you may frequently encounter pollen exhaustion.</p>
+                </div>
 
-    <div class="space-y-5 text-[.75rem] font-sans text-white/60 leading-relaxed mb-8">
-      <div class="border-l-2 border-white/20 pl-4">
-        <p class="text-white/80 font-medium mb-1 uppercase tracking-wider text-[.6rem]">⚡ Authentication &amp; Pollen Credits</p>
-        <p>This platform uses the <strong class="text-white/90">Pollinations BYOP</strong> system. You authenticate with your own Pollinations account and all generation costs are deducted from <em>your personal pollen balance</em>. We have zero visibility into or control over your credits. Lost pollen from failed or partial generations is <strong class="text-white/90">non-refundable</strong>.</p>
-      </div>
-      <div class="border-l-2 border-white/20 pl-4">
-        <p class="text-white/80 font-medium mb-1 uppercase tracking-wider text-[.6rem]">🌱 Tier Requirements</p>
-        <p><span class="tier-pill tier-seed">Seed Tier</span> users enjoy full access to all automation features including multi-page books, audiobooks, and cover generation. <span class="tier-pill tier-spore">Spore Tier</span> users are subject to rate limits that may interrupt large generations. <strong class="text-white/90">We strongly recommend the Seed tier</strong> for the best experience.</p>
-      </div>
-      <div class="border-l-2 border-white/20 pl-4">
-        <p class="text-white/80 font-medium mb-1 uppercase tracking-wider text-[.6rem]">📖 Content &amp; Intellectual Property</p>
-        <p>Generating content using AI models may produce outputs governed by the terms of those underlying models (OpenAI, FLUX, etc.). You are solely responsible for the content you generate, publish, or distribute. Do not generate illegal, harmful, or infringing content.</p>
-      </div>
-      <div class="border-l-2 border-white/20 pl-4">
-        <p class="text-white/80 font-medium mb-1 uppercase tracking-wider text-[.6rem]">🎧 ElevenLabs Audiobook</p>
-        <p>The audiobook feature requires your own ElevenLabs API key. Your key is used client-side only and never stored on any server. ElevenLabs character usage is governed by your ElevenLabs subscription plan.</p>
-      </div>
-      <div class="border-l-2 border-white/20 pl-4">
-        <p class="text-white/80 font-medium mb-1 uppercase tracking-wider text-[.6rem]">📦 No Warranty</p>
-        <p>This tool is provided as-is. We make no guarantees about output quality, API uptime, or suitability for commercial publishing. Use at your own discretion.</p>
-      </div>
-    </div>
-
-    <div class="flex items-start gap-3 mb-6 border border-white/10 p-4">
-      <input type="checkbox" id="tos-check" class="mt-1 accent-white w-4 h-4 flex-shrink-0">
-      <label for="tos-check" class="text-[.7rem] font-sans text-white/70 leading-relaxed cursor-pointer">
-        I have read and accept the Terms of Service. I understand that pollen usage is deducted from my personal Pollinations account and that all AI-generated content is my sole responsibility.
-      </label>
-    </div>
-    <button id="tos-accept-btn" onclick="acceptTos()" disabled class="w-full py-4 text-xs font-sans tracking-[.3em] uppercase bg-white text-ink opacity-30 transition-all duration-300 cursor-not-allowed">
-      Enter the Studio
-    </button>
-  </div>
-</div>
-
-<!-- ============ NAV ============ -->
-<nav class="w-full flex flex-col md:flex-row justify-between items-center p-7 md:px-14 no-print z-50 fixed top-0 left-0 mix-blend-difference gap-3">
-  <div class="flex flex-col items-start">
-    <h1 class="text-xs font-sans tracking-[.3em] uppercase text-white font-light">AI Editorial Studio</h1>
-    <a href="https://pollinations.ai" target="_blank" class="pol-mark mt-1">
-      <img src="https://raw.githubusercontent.com/pollinations/pollinations/main/assets/logo.svg" alt="Pollinations" style="width:18px;height:18px;opacity:.65;filter:invert(1);transition:opacity .3s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.65">
-      <span class="text-[.52rem] font-sans tracking-[.2em] uppercase text-white/50">Pollinations AI</span>
-    </a>
-  </div>
-  <a id="auth-btn" class="text-xs font-sans tracking-[.2em] uppercase text-white border-b border-white/30 pb-1 hover:border-white transition-all cursor-pointer hidden">Authenticate Node</a>
-  <div id="user-status" class="hidden flex items-center gap-5">
-    <span id="tier-badge" class="tier-pill tier-spore">SPORE</span>
-    <span class="text-xs font-sans tracking-[.2em] uppercase text-white">POLLEN: <span id="pollen-balance" class="font-medium">...</span></span>
-  </div>
-</nav>
-
-<!-- ============ MAIN FORM ============ -->
-<main class="relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-6 pt-32 pb-20 no-print">
-  <!-- Auth warning -->
-  <div id="auth-warning" class="text-center mb-16 hidden w-full max-w-2xl mx-auto">
-    <h2 class="text-5xl md:text-7xl font-serif text-white mb-6 tracking-tight">Access Restricted</h2>
-    <div class="border border-white/10 p-8 backdrop-blur-sm space-y-4">
-      <p class="text-xs font-sans tracking-[.2em] uppercase text-white/60 leading-loose">Connect your Pollinations account to power the generation pipeline at zero platform cost.</p>
-      <div class="flex flex-wrap gap-3 justify-center mt-4">
-        <div class="tier-pill tier-seed px-4 py-2">🌱 Seed — Full Access</div>
-        <div class="tier-pill tier-spore px-4 py-2">🪸 Spore — Limited</div>
-      </div>
-      <p class="text-[.65rem] font-sans text-white/40 leading-relaxed mt-4">
-        ⚡ Important: All pollen costs are deducted from <em>your</em> personal Pollinations balance. Each page costs ~0.001 pollen (image) + 0.0001 (text). For full automation, <strong class="text-white/70">Seed tier is required</strong>.
-      </p>
-    </div>
-  </div>
-
-  <!-- Studio form -->
-  <div id="app-wrapper" class="hidden w-full max-w-4xl mx-auto mt-8">
-    <div class="mb-16 flex justify-between items-end border-b border-white/10 pb-4">
-      <p class="text-xs font-sans tracking-[.2em] uppercase text-white/40">Allocated Bandwidth</p>
-      <p class="text-sm font-sans tracking-[.2em] text-white"><span id="max-pages-display" class="font-medium text-lg">0</span> MAX PAGES</p>
-    </div>
-
-    <!-- Cover generator toggle -->
-    <div class="mb-12 border border-white/10 p-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-xs font-sans tracking-[.2em] uppercase text-white/80 mb-1">Professional Cover Generator</p>
-          <p class="text-[.62rem] font-sans text-white/40 tracking-wider">Generate a bespoke eBook cover before writing (costs 1 image)</p>
+                <h3 class="text-lg text-white tracking-widest border-b border-white/20 pb-2 uppercase">AI-Generated Content</h3>
+                <p>The content synthesized by our dual-agent pipeline is algorithmic. While we strive for high-end fidelity, variations, hallucinations, and abstract interpretations represent the inherent nature of generative art.</p>
+            </div>
         </div>
-        <button id="cover-toggle-btn" onclick="toggleCoverMode()" class="action-btn">Generate Cover First</button>
-      </div>
-      <div id="cover-section" class="hidden mt-8">
-        <div class="grid md:grid-cols-2 gap-8 items-start">
-          <div class="space-y-5">
-            <div>
-              <label class="block text-[.58rem] font-sans tracking-[.2em] text-white/40 mb-2 uppercase">Cover Title</label>
-              <input type="text" id="cover-title" placeholder="Your Book Title" class="luxury-input lux-sm">
-            </div>
-            <div>
-              <label class="block text-[.58rem] font-sans tracking-[.2em] text-white/40 mb-2 uppercase">Visual Concept</label>
-              <input type="text" id="cover-concept" placeholder="e.g. Dark luxury, neon noir, botanical" class="luxury-input lux-sm">
-            </div>
-            <button onclick="generateCover()" id="cover-gen-btn" class="action-btn mt-4">✦ Generate Cover</button>
-          </div>
-          <div class="cover-frame" id="cover-preview">
-            <div class="absolute inset-0 flex items-center justify-center">
-              <p id="cover-placeholder" class="text-[.6rem] font-sans tracking-[.2em] uppercase text-white/20">Cover Preview</p>
-            </div>
-          </div>
+    </div>
+
+    <!-- Error Toast Container -->
+    <div id="toast-container" class="fixed top-8 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2"></div>
+
+    <!-- Transparent, Ultra-Minimal Nav -->
+    <nav class="w-full flex flex-col md:flex-row justify-between items-center p-8 md:px-16 no-print z-50 fixed top-0 left-0 mix-blend-difference gap-4">
+        <div class="flex flex-col items-center md:items-start">
+            <h1 class="text-sm font-sans tracking-[0.3em] uppercase text-white font-light flex items-center gap-3">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                E-Book Studio
+            </h1>
+            <p class="text-[0.6rem] font-sans tracking-[0.2em] uppercase text-white/50 mt-1">Engine Powered by Pollinations AI</p>
+            <button id="open-tos" class="mt-2 text-[0.6rem] tracking-[0.2em] uppercase text-white/50 border-b border-white/20 hover:text-white transition-colors">Terms of Service</button>
         </div>
-      </div>
-    </div>
-
-    <div class="space-y-14">
-      <div class="group">
-        <label class="block text-xs font-sans tracking-[.2em] text-white/40 mb-2 uppercase group-focus-within:text-white">01 — Subject Matter</label>
-        <input type="text" id="topic" placeholder="e.g. The Architecture of Minimalist Sound" class="luxury-input">
-      </div>
-      <div class="group">
-        <label class="block text-xs font-sans tracking-[.2em] text-white/40 mb-2 uppercase group-focus-within:text-white">02 — Art Direction &amp; Tone</label>
-        <input type="text" id="style" placeholder="e.g. Bauhaus, High-Contrast, Melancholic" class="luxury-input">
-      </div>
-      <div class="group">
-        <label class="block text-xs font-sans tracking-[.2em] text-white/40 mb-2 uppercase group-focus-within:text-white">03 — Page Count</label>
-        <input type="number" id="pages-count" value="4" min="1" class="luxury-input w-28">
-        <p id="page-warning" class="text-[.62rem] font-sans tracking-widest text-red-500 mt-3 hidden uppercase">Insufficient Pollen Balance</p>
-      </div>
-      <div class="group">
-        <label class="block text-xs font-sans tracking-[.2em] text-white/40 mb-2 uppercase group-focus-within:text-white">04 — Custom Instructions</label>
-        <input type="text" id="custom-instructions" placeholder="e.g. Write in second person, focus on sustainability, avoid clichés" class="luxury-input">
-      </div>
-    </div>
-
-    <div class="mt-20 pt-8 text-center flex flex-col items-center">
-      <button id="generate-btn" class="text-sm font-sans tracking-[.3em] uppercase text-ink bg-white border border-white px-14 py-5 hover:bg-transparent hover:text-white transition-all duration-700 w-full md:w-auto shadow-[0_0_40px_rgba(255,255,255,.1)] hover:shadow-none">
-        Initialize Generation Pipeline
-      </button>
-      <div id="status-container" class="mt-10 hidden w-full max-w-lg">
-        <div class="prog-track mb-3"><div class="prog-bar" id="prog-bar"></div></div>
-        <p id="status-text" class="text-xs font-sans tracking-[.2em] uppercase text-white pulse-text"></p>
-      </div>
-    </div>
-  </div>
-</main>
-
-<!-- ============ OUTPUT AREA (SPLIT SCREEN) ============ -->
-<div id="output-area" class="hidden w-full z-20 relative">
-  <div id="book-outer" class="min-w-0">
-
-    <!-- Toolbar -->
-    <div class="no-print sticky top-0 z-30 bg-ink border-b border-white/10 px-5 py-3 flex flex-wrap items-center gap-2">
-      <button onclick="window.print()" class="action-btn">Export PDF</button>
-      <button id="epub-btn" onclick="handleEpubExport()" class="action-btn">📦 Download EPUB</button>
-      <div class="flex items-center gap-2">
-        <input type="text" id="translate-lang" placeholder="e.g. Japanese" class="translate-input">
-        <button id="translate-btn" class="action-btn" onclick="handleTranslate()">Translate</button>
-      </div>
-      <button id="critique-btn" class="action-btn" onclick="handleCritique()">✦ Critique</button>
-      <button id="audio-btn" class="action-btn" onclick="toggleAudioPanel()">🎧 Audiobook</button>
-      <div class="ml-auto flex items-center gap-2">
-        <a href="https://pollinations.ai" target="_blank" class="pol-mark">
-      <img src="https://raw.githubusercontent.com/pollinations/pollinations/main/assets/logo.svg" alt="Pollinations" style="width:16px;height:16px;opacity:.5;filter:invert(1)">
-          <span class="text-[.52rem] font-sans tracking-[.2em] uppercase text-white/40">Pollinations AI</span>
+        
+        <a id="auth-btn" class="text-xs font-sans tracking-[0.2em] uppercase text-white border-b border-white/30 pb-1 hover:border-white transition-all cursor-pointer hidden">
+            Authenticate Node
         </a>
-      </div>
-    </div>
-
-    <!-- Pollen error banner -->
-    <div id="pollen-error-banner" class="hidden no-print bg-red-950 border border-red-500/30 px-5 py-3 text-center">
-      <p id="pollen-error-msg" class="text-[.62rem] font-sans tracking-[.2em] uppercase text-red-400"></p>
-    </div>
-
-    <!-- Audiobook panel -->
-    <div id="audio-panel" class="hidden no-print bg-ink border-b border-white/10 px-6 py-6">
-      <div class="max-w-3xl mx-auto">
-        <p class="text-xs font-sans tracking-[.3em] uppercase text-white/80 mb-5">🎧 Audiobook Studio</p>
-        <div class="grid md:grid-cols-3 gap-5 mb-5">
-          <div>
-            <label class="block text-[.55rem] font-sans tracking-[.2em] uppercase text-white/40 mb-2">ElevenLabs API Key (Optional)</label>
-            <input type="password" id="el-api-key" placeholder="sk_... (leave blank for Pollinations TTS)" class="translate-input w-full text-[.65rem]" style="width:100%">
-          </div>
-          <div>
-            <label class="block text-[.55rem] font-sans tracking-[.2em] uppercase text-white/40 mb-2">Voice</label>
-            <select id="el-voice" class="translate-input w-full bg-transparent text-white/70" style="width:100%">
-              <option value="nova">Nova (Pollinations)</option>
-              <option value="alloy">Alloy (Pollinations)</option>
-              <option value="echo">Echo (Pollinations)</option>
-              <option value="21m00Tcm4TlvDq8ikWAM">Rachel (ElevenLabs)</option>
-              <option value="AZnzlk1XvdvUeBnXmlld">Domi (ElevenLabs)</option>
-              <option value="EXAVITQu4vr4xnSDxMaL">Bella (ElevenLabs)</option>
-              <option value="MF3mGyEYCl7XYWbV9V6O">Elli (ElevenLabs)</option>
-              <option value="pNInz6obpgDQGcFmaJgB">Adam (ElevenLabs)</option>
-              <option value="VR6AewLTigWG4xSOukaG">Arnold (ElevenLabs)</option>
-            </select>
-          </div>
-          <div class="flex items-end">
-            <button id="gen-audio-btn" onclick="generateAudiobook()" class="action-btn w-full">Generate Audiobook</button>
-          </div>
+        
+        <div id="user-status" class="hidden flex items-center space-x-6">
+            <span id="tier-badge" class="text-[0.6rem] font-sans tracking-[0.3em] uppercase text-white border border-white/20 px-3 py-1 bg-white/10">SPORE</span>
+            <span class="text-xs font-sans tracking-[0.2em] uppercase text-white">
+                POLLEN: <span id="pollen-balance" class="font-medium text-white shadow-sm">...</span>
+            </span>
         </div>
-        <div id="audio-progress" class="hidden mb-4">
-          <div class="prog-track mb-2"><div class="prog-bar" id="audio-prog-bar"></div></div>
-          <p id="audio-status" class="text-[.58rem] font-sans tracking-[.2em] uppercase text-white/50 pulse-text"></p>
+    </nav>
+
+    <!-- Main Studio Interface -->
+    <main class="relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-6 pt-32 pb-20 no-print" id="main-view">
+        
+        <!-- Auth Warning State -->
+        <div id="auth-warning" class="text-center mb-16 hidden">
+            <h2 class="text-4xl md:text-6xl font-serif text-white mb-6 tracking-tight">Access Restricted</h2>
+            <p class="text-xs font-sans tracking-[0.2em] uppercase text-white/60 max-w-lg mx-auto leading-loose border border-white/10 p-6 backdrop-blur-sm">
+                Authentication required. Connect your Pollinations node to utilize the multi-modal generation engine at zero platform cost.
+            </p>
         </div>
-        <div id="audio-tracks" class="space-y-3"></div>
-      </div>
+
+        <!-- The Studio Form (Brutalist Luxury) -->
+        <div id="app-wrapper" class="hidden w-full max-w-4xl mx-auto mt-12">
+            
+            <div id="limits-dashboard" class="mb-20 flex justify-between items-end border-b border-white/10 pb-4">
+                <p class="text-xs font-sans tracking-[0.2em] uppercase text-white/40">Allocated Bandwidth</p>
+                <p class="text-sm font-sans tracking-[0.2em] text-white"><span id="max-pages-display" class="font-medium text-lg text-white">0</span> MAX PAGES</p>
+            </div>
+
+            <div class="space-y-16">
+                <!-- Input 1 -->
+                <div class="group">
+                    <label class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase transition-colors group-focus-within:text-white">01 &mdash; Subject Matter</label>
+                    <input type="text" id="topic" placeholder="e.g. The Architecture of Minimalist Sound" class="luxury-input">
+                </div>
+                
+                <!-- Input 2 -->
+                <div class="group">
+                    <label class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase transition-colors group-focus-within:text-white">02 &mdash; Art Direction & Tone</label>
+                    <input type="text" id="style" placeholder="e.g. Bauhaus, High-Contrast, Melancholic" class="luxury-input">
+                </div>
+                
+                <!-- Input 3 (Custom Instructions) -->
+                <div class="group">
+                    <label class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase transition-colors group-focus-within:text-white flex items-center justify-between">
+                        <span>03 &mdash; Custom Instructions</span>
+                        <span class="text-[0.6rem] tracking-widest text-white/50 border border-white/20 px-2 py-0.5 ml-3 bg-white/5 inline-block">PREMIUM PARAMETER</span>
+                    </label>
+                    <input type="text" id="custom-instructions" placeholder="e.g. Speak like a 19th-century poet, extreme minimalism..." class="luxury-input text-lg">
+                </div>
+
+                <!-- Input 4 -->
+                <div class="group">
+                    <label class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase transition-colors group-focus-within:text-white">04 &mdash; Page Count</label>
+                    <input type="number" id="pages-count" value="4" min="1" class="luxury-input w-32">
+                    <p id="page-warning" class="text-[0.65rem] font-sans tracking-widest text-red-500 mt-4 hidden uppercase">Insufficient Pollen Balance for this request</p>
+                </div>
+            </div>
+            
+            <!-- Generate Action -->
+            <div class="mt-24 pt-10 text-center flex flex-col items-center">
+                <button id="generate-btn" class="text-sm font-sans tracking-[0.3em] uppercase text-ink bg-white border border-white px-16 py-6 hover:bg-transparent hover:text-white transition-all duration-700 w-full md:w-auto shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:shadow-none">
+                    Initialize Dual-Agent Pipeline
+                </button>
+                <div id="status-container" class="mt-12 h-8 hidden">
+                    <p id="status-text" class="text-xs font-sans tracking-[0.2em] uppercase text-white pulse-text"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Rendered Workspace (Split Screen Architecture) -->
+    <div id="workspace-container" class="hidden h-screen bg-cream z-20 relative pt-24 overflow-hidden">
+        
+        <!-- Generated Book Area -->
+        <div id="book-container" class="w-full h-full overflow-y-auto bg-cream transition-all duration-700 hidden-scrollbar border-r border-gray-300">
+            <!-- Toolbar -->
+            <div class="text-center py-4 bg-ink no-print sticky top-0 z-30 flex justify-between items-center px-4 md:px-8 border-b border-white/10 shadow-xl flex-wrap gap-4">
+                <div class="flex items-center gap-4">
+                    <button id="back-btn" class="text-xs font-sans tracking-[0.2em] text-white/50 hover:text-white transition-colors uppercase">&larr; Back</button>
+                    <p class="text-[0.65rem] font-sans tracking-[0.3em] uppercase text-white/50 border-l border-white/20 pl-4 hidden md:block">Rendered via Pollinations AI</p>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <!-- Translate System -->
+                    <div class="flex items-center border border-white/20 focus-within:border-white transition-colors">
+                        <input type="text" id="target-language" placeholder="Language" class="bg-transparent text-[0.65rem] text-white px-3 py-2 outline-none w-20 md:w-24 tracking-widest uppercase placeholder-white/40">
+                        <button id="translate-btn" class="text-[0.65rem] font-sans tracking-[0.2em] uppercase text-white hover:bg-white hover:text-ink transition-colors px-3 py-2 border-l border-white/20">
+                            Translate
+                        </button>
+                    </div>
+                    
+                    <button id="tts-btn" class="text-[0.65rem] font-sans tracking-[0.2em] uppercase text-white hover:bg-white hover:text-ink transition-colors border border-white/20 px-4 py-2 flex items-center gap-2">
+                        <span>AUDIOBOOK</span>
+                    </button>
+                    
+                    <button id="critique-btn" class="text-[0.65rem] font-sans tracking-[0.2em] uppercase text-white hover:bg-white hover:text-ink transition-colors border border-white/20 px-4 py-2">
+                        Critique
+                    </button>
+                    
+                    <button onclick="window.print()" class="text-[0.65rem] font-sans tracking-[0.2em] uppercase text-white hover:bg-white hover:text-ink transition-colors border border-white/20 px-4 py-2 hidden md:block">
+                        PDF
+                    </button>
+                </div>
+            </div>
+            
+            <div class="magazine-wrapper" id="book-content">
+                <!-- AI Content Injected Here -->
+            </div>
+
+            <!-- Enhanced Footer Logo (Branding) -->
+            <div class="text-center py-20 bg-cream border-t border-gray-200">
+                <div class="flex justify-center items-center gap-4 mb-4 text-ink">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    <p class="text-lg font-sans tracking-[0.3em] uppercase font-light">Pollinations AI</p>
+                </div>
+                <p class="text-[0.65rem] font-sans tracking-[0.3em] uppercase text-gray-500 mb-4">Concept to Reality</p>
+                <div class="w-16 h-[1px] bg-gray-300 mx-auto mb-4"></div>
+                <p class="text-sm font-serif italic text-gray-700 px-8 max-w-sm mx-auto leading-relaxed">Our profound gratitude to Pollinations for empowering this generation engine flawlessly.</p>
+            </div>
+        </div>
+
+        <!-- Sidebar Panel for Critique -->
+        <div id="critique-panel" class="w-0 bg-ink flex-shrink-0 h-full overflow-y-auto hidden-scrollbar relative no-print shadow-[-10px_0_30px_rgba(0,0,0,0.5)]">
+            <button id="close-critique" class="absolute top-6 right-8 text-white text-3xl hover:text-white/60 transition-colors">&times;</button>
+            <div class="p-10 w-full md:w-96 max-w-full">
+                <div class="mb-10 border-b border-white/20 pb-6">
+                    <h3 class="text-4xl font-serif text-white tracking-widest leading-tight">Editor-in<br>Chief</h3>
+                    <p class="text-[0.65rem] tracking-[0.4em] text-green-400 uppercase mt-2">Vogue Persona Active</p>
+                </div>
+                <div id="critique-content" class="text-white space-y-8">
+                    <!-- Critique injected here -->
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Book content -->
-    <div class="magazine-wrapper" id="book-content"></div>
+    <script>
+    // Balance validation framework
+    let currentBalance = 0;
+    
+    // Abstract application state
+    window.currentManuscript = null;
+    window.currentImages = [];
+    window.currentTopic = "";
+    window.currentStyle = "";
+    window.currentCustom = "";
 
-    <!-- Footer -->
-    <footer class="bg-cream border-t border-gray-200 py-14 text-center">
-      <div class="flex flex-col items-center gap-4">
-        <a href="https://pollinations.ai" target="_blank" class="flex items-center gap-3 group">
-          <img src="https://raw.githubusercontent.com/pollinations/pollinations/main/assets/logo.svg" alt="Pollinations" style="width:30px;height:30px;opacity:.4;transition:opacity .3s" onmouseover="this.style.opacity=.8" onmouseout="this.style.opacity=.4">
-          <span class="font-serif text-2xl text-gray-400 italic group-hover:text-gray-700 transition-colors">Pollinations.ai</span>
-        </a>
-        <p class="text-[.6rem] font-sans tracking-[.3em] uppercase text-gray-400">Generated with deep gratitude</p>
-        <p class="text-sm font-serif italic text-gray-500 max-w-md leading-relaxed px-6">This editorial universe was conjured through the free, open-source intelligence of <span class="text-gray-700">Pollinations AI</span> — powering a new generation of creative tools.</p>
-      </div>
-    </footer>
-  </div>
-
-  <!-- Critique panel -->
-  <div id="critique-panel">
-    <div id="critique-inner">
-      <div id="critique-loading" class="flex items-center justify-center h-64 hidden">
-        <p class="text-xs font-sans tracking-[.3em] uppercase text-white/40 pulse-text">Consulting the Editor-in-Chief…</p>
-      </div>
-      <div id="critique-content" class="hidden">
-        <div class="flex flex-col items-center gap-3 mb-8 pt-2">
-          <p class="text-[.52rem] font-sans tracking-[.3em] uppercase text-white/30">Vogue Editor's Verdict</p>
-          <div class="score-ring" style="--score:0" id="score-ring"><span id="score-display">0</span></div>
-          <p class="text-[.55rem] font-sans tracking-[.2em] uppercase text-white/40">/ 10</p>
-        </div>
-        <div class="w-full h-px bg-white/10 mb-8"></div>
-        <p class="text-[.52rem] font-sans tracking-[.25em] uppercase text-white/30 mb-3">Editor's Note</p>
-        <p id="critique-summary" class="text-sm font-serif italic text-white/80 leading-relaxed mb-8"></p>
-        <p class="text-[.55rem] font-sans tracking-[.2em] uppercase text-emerald-400 mb-3">✓ The Dos</p>
-        <ul id="critique-dos" class="space-y-2 mb-7"></ul>
-        <p class="text-[.55rem] font-sans tracking-[.2em] uppercase text-red-400 mb-3">✕ The Don'ts</p>
-        <ul id="critique-donts" class="space-y-2 mb-7"></ul>
-        <button onclick="closeCritique()" class="action-btn w-full mt-4">Close Critique</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-// ── STATE ──────────────────────────────────────────────────
-let apiKey = null, maxAllowedPages = 0, currentPollenBalance = 0;
-let currentManuscript = null, currentImageUrls = [], currentArtDirection = null;
-let critiqueOpen = false, coverBlobUrl = null;
-
-// ── TOS ────────────────────────────────────────────────────
-document.getElementById('tos-check').addEventListener('change', e => {
-  const btn = document.getElementById('tos-accept-btn');
-  btn.disabled = !e.target.checked;
-  btn.classList.toggle('opacity-30', !e.target.checked);
-  btn.classList.toggle('cursor-not-allowed', !e.target.checked);
-});
-function acceptTos() {
-  if (!document.getElementById('tos-check').checked) return;
-  document.getElementById('tos-modal').classList.add('hidden');
-  localStorage.setItem('tos-accepted', '1');
-}
-if (localStorage.getItem('tos-accepted') === '1') {
-  document.getElementById('tos-modal').classList.add('hidden');
-}
-
-// ── AUTH ───────────────────────────────────────────────────
-const urlHash = new URLSearchParams(location.hash.slice(1));
-apiKey = urlHash.get('api_key');
-if (window.location.hash) window.history.replaceState(null, null, location.pathname);
-
-const authBtn = document.getElementById('auth-btn');
-const authWarning = document.getElementById('auth-warning');
-const appWrapper = document.getElementById('app-wrapper');
-
-if (apiKey) {
-  authWarning.classList.add('hidden');
-  appWrapper.classList.remove('hidden');
-  document.getElementById('user-status').classList.remove('hidden');
-  fetchAccountData();
-} else {
-  authWarning.classList.remove('hidden');
-  authBtn.classList.remove('hidden');
-  const params = new URLSearchParams({ redirect_url: location.href.split('#')[0], permissions: 'profile,balance' });
-  authBtn.href = `https://enter.pollinations.ai/authorize?${params}`;
-  authBtn.target = '_top';
-}
-
-async function fetchAccountData() {
-  try {
-    const r = await fetch('https://gen.pollinations.ai/account/balance', { headers: { Authorization: `Bearer ${apiKey}` } });
-    const d = await r.json();
-    currentPollenBalance = parseFloat(d.balance ?? d) || 0;
-    document.getElementById('pollen-balance').innerText = currentPollenBalance.toFixed(3);
-    maxAllowedPages = Math.floor(currentPollenBalance / 0.0011);
-    document.getElementById('max-pages-display').innerText = maxAllowedPages;
-    document.getElementById('pages-count').max = maxAllowedPages;
-    const pr = await fetch('https://gen.pollinations.ai/account/profile', { headers: { Authorization: `Bearer ${apiKey}` } });
-    if (pr.ok) {
-      const pd = await pr.json();
-      const badge = document.getElementById('tier-badge');
-      if (pd.tier) { badge.innerText = pd.tier.toUpperCase(); badge.className = `tier-pill ${pd.tier === 'seed' ? 'tier-seed' : 'tier-spore'}`; }
-    }
-  } catch(e) { console.warn('Account fetch error', e); }
-}
-
-document.getElementById('pages-count').addEventListener('input', e => {
-  const warn = document.getElementById('page-warning');
-  const btn = document.getElementById('generate-btn');
-  const over = parseInt(e.target.value) > maxAllowedPages;
-  warn.classList.toggle('hidden', !over);
-  btn.disabled = over;
-  btn.classList.toggle('opacity-30', over);
-  btn.classList.toggle('pointer-events-none', over);
-});
-
-// ── HELPERS ────────────────────────────────────────────────
-function parseAIJson(raw) {
-  // Strip markdown code blocks
-  let s = raw.replace(/```json/g,'').replace(/```/g,'').trim();
-
-  // Handle preamble (e.g., "Here is the JSON: { ... }") or cut off completion
-  const a = s.indexOf('{');
-  const b = s.lastIndexOf('}');
-  
-  if (a === -1) {
-    throw new Error('AI returned no JSON structure at all.');
-  }
-  
-  // If it didn't finish the JSON, pretend it did for the parser's sake
-  s = b !== -1 ? s.slice(a, b + 1) : s.slice(a) + ']}';
-
-  // Strip JS comments
-  s = s.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
-  // Remove trailing commas before } or ]
-  s = s.replace(/,\s*([\]}])/g, '$1');
-  // Fix smart/curly quotes
-  s = s.replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
-
-  // Escape literal newlines/tabs INSIDE JSON string values (DeepSeek main issue)
-  let fixed = '', inStr = false, esc = false;
-  for (let i = 0; i < s.length; i++) {
-    const c = s[i];
-    if (esc) { fixed += c; esc = false; continue; }
-    if (c === '\\') { fixed += c; esc = true; continue; }
-    if (c === '"') { fixed += c; inStr = !inStr; continue; }
-    if (inStr) {
-      if (c === '\n') { fixed += '\\n'; continue; }
-      if (c === '\r') { fixed += '\\r'; continue; }
-      if (c === '\t') { fixed += '\\t'; continue; }
-    }
-    fixed += c;
-  }
-  try {
-    return JSON.parse(fixed);
-  } catch(e) {
-    console.error('[parseAIJson] Failed. Cleaned:', fixed.slice(0, 800));
-    throw new Error('AI returned malformed data. Please try again.');
-  }
-}
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-// FIX 5: Input sanitization — strip control chars & dangerous delimiters, cap length
-function sanitize(s) {
-  return String(s).replace(/[\u0000-\u001F"\\`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 500);
-}
-function checkPollen(need, action) {
-  if (currentPollenBalance < need) { showPollenErr(`⚠ You need more pollen to ${action}. Balance: ${currentPollenBalance.toFixed(4)}`); return false; }
-  return true;
-}
-function showPollenErr(msg) {
-  const b = document.getElementById('pollen-error-banner');
-  document.getElementById('pollen-error-msg').innerText = msg;
-  b.classList.remove('hidden');
-  b.classList.add('err-flash');
-  b.scrollIntoView({ behavior:'smooth', block:'start' });
-  setTimeout(() => b.classList.remove('err-flash'), 1400);
-  setTimeout(() => b.classList.add('hidden'), 7000);
-}
-function setProgress(pct) { document.getElementById('prog-bar').style.width = pct + '%'; }
-
-// Retry only on network failure or 429/5xx. Never retry 4xx client errors.
-async function fetchWithRetry(url, options = {}, retries = 3) {
-  for (let i = 0; i < retries; i++) {
-    let r;
-    try {
-      r = await fetch(url, options);
-    } catch(networkErr) {
-      // Pure network failure (offline, DNS, etc.) — retryable
-      if (i === retries - 1) throw networkErr;
-      await new Promise(res => setTimeout(res, 800 * Math.pow(2, i)));
-      continue;
-    }
-    if (r.ok) return r;
-    // 4xx client errors are never retryable — fail immediately with body hint
-    if (r.status < 500 && r.status !== 429) {
-      let hint = '';
-      try { const j = await r.json(); hint = j.error?.message || j.message || ''; } catch(_) {}
-      throw new Error(`HTTP ${r.status}${hint ? ': ' + hint : ''}`);
-    }
-    // 429 / 5xx — retryable with backoff
-    if (i < retries - 1) await new Promise(res => setTimeout(res, 1000 * Math.pow(2, i)));
-    else throw new Error(`HTTP ${r.status} after ${retries} retries`);
-  }
-}
-
-// Blob fetch with retry + blob URL revocation (FIX 2)
-async function fetchImgBlob(prompt, oldUrl = null) {
-  const r = await fetchWithRetry(
-    `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}?model=flux&width=1280&height=720&nologo=true`,
-    { headers: { Authorization: `Bearer ${apiKey}` } }
-  );
-  if (oldUrl) URL.revokeObjectURL(oldUrl);
-  return URL.createObjectURL(await r.blob());
-}
-
-// chatCompletion: primary model is deepseek (no Azure). Auto-retries with deepseek if ANY model
-// returns an Azure content-filter error (HTTP 400 with "content management policy" in body).
-const PRIMARY_MODEL = 'deepseek';
-const FALLBACK_MODEL = 'mistral';
-
-async function _doChat(model, messages, temperature, json) {
-  const body = { model, messages, temperature, private: false };
-  if (json) body.response_format = { type: 'json_object' };
-  const r = await fetchWithRetry('https://gen.pollinations.ai/v1/chat/completions', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  const d = await r.json();
-  // Surface server-level content filter rejections
-  const content = d.choices?.[0]?.message?.content;
-  if (!content) throw new Error(d.error?.message || 'Empty response from model');
-  return content;
-}
-
-async function chatCompletion(messages, temperature = 0.5, json = true) {
-  try {
-    return await _doChat(PRIMARY_MODEL, messages, temperature, json);
-  } catch(e) {
-    const isFilter = /content management policy|filtered|content_filter/i.test(e.message);
-    if (isFilter) {
-      console.warn(`[chatCompletion] Content filter on ${PRIMARY_MODEL}, retrying with ${FALLBACK_MODEL}`);
-      return await _doChat(FALLBACK_MODEL, messages, temperature, json);
-    }
-    throw e;
-  }
-}
-
-// ── COVER GENERATOR ────────────────────────────────────────
-function toggleCoverMode() {
-  const sec = document.getElementById('cover-section');
-  sec.classList.toggle('hidden');
-  document.getElementById('cover-toggle-btn').innerText = sec.classList.contains('hidden') ? 'Generate Cover First' : 'Hide Cover Studio';
-}
-async function generateCover() {
-  if (!checkPollen(0.002, 'generate a cover')) return;
-  const title = document.getElementById('cover-title').value || document.getElementById('topic').value || 'Editorial';
-  const concept = document.getElementById('cover-concept').value || document.getElementById('style').value || 'luxury dark';
-  const btn = document.getElementById('cover-gen-btn');
-  btn.disabled = true; btn.innerText = '↺ Generating…';
-  document.getElementById('cover-placeholder').innerText = 'Rendering…';
-  try {
-    const prompt = `Book cover for "${title}". Style: ${concept}. Portrait orientation 2:3. Highly detailed cover art, luxury editorial design, atmospheric lighting, premium quality, dramatic composition, cinematic color grading. NO text, NO letters, NO words in the image. masterpiece, 8k resolution.`;
-    const r = await fetch(`https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}?model=flux&width=832&height=1248`, { headers: { Authorization: `Bearer ${apiKey}` } });
-    if (!r.ok) throw new Error('Cover generation failed');
-    coverBlobUrl = URL.createObjectURL(await r.blob());
-    const prev = document.getElementById('cover-preview');
-    prev.innerHTML = `<img src="${coverBlobUrl}" alt="Cover" style="width:100%;height:100%;object-fit:cover">`;
-    btn.innerText = '✓ Regenerate Cover';
-    setTimeout(fetchAccountData, 2000);
-  } catch(e) { btn.innerText = '✕ Failed — Retry'; showPollenErr(e.message); }
-  finally { btn.disabled = false; }
-}
-
-// ── REFINED AUTHOR PROMPT ──────────────────────────────────
-function buildAuthorPrompt(topic, style, pages, custom) {
-  return `You are the Editor-in-Chief of a prestigious publication.
-
-TASK: Write a complete ${pages}-page editorial piece about "${topic}".
-AESTHETIC VOICE: ${style}
-${custom ? `DIRECTIVES: ${custom}\n` : ''}
-QUALITY STANDARDS:
-- Every paragraph must earn its place. No filler, no generic statements.
-- Open each page with a powerful insight or counterintuitive observation.
-- Use specific references, sensory details, and concrete examples.
-- Vary sentence rhythm. Each page must read as a standalone meditation.
-
-FORMATTING:
-- Use <p> for paragraphs, <h3> for sub-headers, <ul><li> for lists.
-- NO markdown, only HTML tags inside content strings.
-
-CRITICAL JSON RULES:
-- Return ONLY a valid JSON object, nothing else.
-- ALL string values must be on a SINGLE LINE. Never use literal newlines inside strings.
-- Use proper JSON escaping: write \\n if you need a line break inside a string.
-- Do NOT add trailing commas.
-- Do NOT add comments.
-
-Return this exact JSON structure and absolutely nothing else. DO NOT WRITE A PREAMBLE:
-{"title": "An original title", "introduction": "A 2-3 sentence hook.", "pages": [{"page_title": "Chapter name", "content": "<p>All HTML content on one line like this.</p><p>Next paragraph.</p>"}]}
-
-{\`;
-}
-
-// ── REFINED ART DIRECTOR PROMPT ────────────────────────────
-function buildArtPrompt(pages, style, topic) {
-  return `You are a legendary Art Director whose images appear in Vogue, Wallpaper*, and AnOther Magazine. Your visual language is precise, intentional, and never derivative.
-
-TASK: For each of the ${pages.length} manuscript pages below, design ONE definitive photography prompt for FLUX (an AI image generator). The global aesthetic is: "${style}".
-
-PROMPT ENGINEERING RULES:
-1. SUBJECT: Describe the primary subject with extreme specificity — not "a woman" but "a solitary figure in an oversized charcoal linen coat"
-2. LIGHTING: Name the exact light quality (volumetric fog light, single tungsten source, diffused Nordic overcast, golden-hour rim light)
-3. LENS: Specify lens character (Hasselblad medium format, 85mm f/1.2 bokeh, wide-angle architectural distortion)
-4. MOOD: One precise emotional atmosphere word (desolate, triumphant, meditative, unnerving)
-5. COLOR: Specify the dominant palette (desaturated sage and ivory, high-contrast monochrome with amber accent)
-6. COMPOSITION: Camera angle and framing (bird's-eye symmetry, Dutch tilt, extreme close-up of texture)
-7. Always end with: "award-winning editorial photography, masterpiece, 8k ultra-detailed, no noise"
-8. ABSOLUTE PROHIBITION: NO TEXT, NO LETTERS, NO NUMBERS, NO WORDS in any prompt.
-
-PAGES:
-${JSON.stringify(pages.map(p => ({ title: p.page_title, excerpt: p.content.replace(/<[^>]*>/g,'').slice(0,300) })))}
-
-Return this JSON (exactly ${pages.length} strings) and nothing else:
-{"image_prompts": ["Prompt 1...", "Prompt 2..."]}
-
-{\`;
-}
-
-// ── GENERATE PIPELINE ──────────────────────────────────────
-const generateBtn = document.getElementById('generate-btn');
-generateBtn.onclick = async () => {
-  // FIX 5: sanitize inputs before they enter any prompt
-  const topic = sanitize(document.getElementById('topic').value.trim());
-  const style = sanitize(document.getElementById('style').value.trim());
-  const pages = parseInt(document.getElementById('pages-count').value);
-  const custom = sanitize(document.getElementById('custom-instructions').value.trim());
-  if (!topic || !style) { alert('Subject Matter and Art Direction are required.'); return; }
-  const cost = pages * 0.0012 + 0.0003;
-  if (!checkPollen(cost, 'generate this book')) return;
-
-  try {
-    generateBtn.disabled = true;
-    generateBtn.innerText = 'PIPELINE ACTIVE';
-    generateBtn.classList.add('bg-transparent','text-white','pointer-events-none');
-    currentManuscript = null; currentImageUrls = []; currentArtDirection = null;
-    critiqueOpen = false; closeCritique(true);
-    document.getElementById('output-area').classList.add('hidden');
-    document.getElementById('book-content').innerHTML = '';
-    document.getElementById('audio-tracks').innerHTML = '';
-    document.getElementById('status-container').classList.remove('hidden');
-    setProgress(5);
-
-    // AGENT 01 — AUTHOR
-    document.getElementById('status-text').innerText = '[ AGENT 01 ] CRAFTING MANUSCRIPT…';
-    const authorRaw = await chatCompletion([{ role:'user', content: buildAuthorPrompt(topic, style, pages, custom) }], 0.6);
-    // If the model didn't start its response with the { we forced in the prompt, add it back
-    const safeAuthorRaw = authorRaw.trim().startsWith('{') ? authorRaw : '{' + authorRaw;
-    currentManuscript = parseAIJson(safeAuthorRaw);
-    setProgress(30);
-
-    // AGENT 02 — ART DIRECTOR
-    document.getElementById('status-text').innerText = '[ AGENT 02 ] DIRECTING VISUAL CONCEPTS…';
-    const artRaw = await chatCompletion([{ role:'user', content: buildArtPrompt(currentManuscript.pages, style, topic) }], 0.75);
-    const safeArtRaw = artRaw.trim().startsWith('{') ? artRaw : '{' + artRaw;
-    currentArtDirection = parseAIJson(safeArtRaw);
-    setProgress(45);
-
-    // AGENT 03 — RENDERER
+    const authBtn = document.getElementById('auth-btn');
+    const authWarning = document.getElementById('auth-warning');
+    const appWrapper = document.getElementById('app-wrapper');
+    const userStatus = document.getElementById('user-status');
+    const limitsDashboard = document.getElementById('limits-dashboard');
+    const maxPagesDisplay = document.getElementById('max-pages-display');
+    const pagesInput = document.getElementById('pages-count');
+    const pageWarning = document.getElementById('page-warning');
+    const pollenBalanceEl = document.getElementById('pollen-balance');
+    const tierBadgeEl = document.getElementById('tier-badge');
+    
+    // Element selections
+    const toastContainer = document.getElementById('toast-container');
+    const generateBtn = document.getElementById('generate-btn');
+    const statusContainer = document.getElementById('status-container');
+    const statusText = document.getElementById('status-text');
+    
+    const mainView = document.getElementById('main-view');
+    const workspaceContainer = document.getElementById('workspace-container');
+    const bookContainer = document.getElementById('book-container');
     const bookContent = document.getElementById('book-content');
-    bookContent.innerHTML = buildCoverPageHTML(currentManuscript, coverBlobUrl);
-    document.getElementById('output-area').classList.remove('hidden');
+    const critiquePanel = document.getElementById('critique-panel');
+    const critiqueContent = document.getElementById('critique-content');
+    
+    // Feature: Terms of Service Modal
+    document.getElementById('open-tos').onclick = () => document.getElementById('tos-modal').classList.remove('hidden');
+    document.getElementById('close-tos').onclick = () => document.getElementById('tos-modal').classList.add('hidden');
+    
+    // Feature: Back to setup
+    document.getElementById('back-btn').onclick = () => {
+        workspaceContainer.classList.add('hidden');
+        mainView.classList.remove('hidden');
+    };
 
-    // FIX 3: Generate all images in parallel instead of sequentially
-    document.getElementById('status-text').innerText = `[ RENDERER ] GENERATING ${currentManuscript.pages.length} IMAGES IN PARALLEL…`;
-    setProgress(50);
-    const imagePrompts = currentManuscript.pages.map((_, i) =>
-      currentArtDirection.image_prompts[i] || `${topic}, ${style}, award-winning editorial photography, 8k`
-    );
-    // Revoke any old blob URLs first (FIX 2)
-    currentImageUrls.forEach(u => { if (u) URL.revokeObjectURL(u); });
-    currentImageUrls = await Promise.all(imagePrompts.map(p => fetchImgBlob(p)));
-    setProgress(85);
-    // Render pages now that all images are ready
-    currentManuscript.pages.forEach((page, i) => {
-      bookContent.innerHTML += buildPageHTML(i, page, currentImageUrls[i], currentManuscript.title);
-    });
-    document.getElementById('output-area').scrollIntoView({ behavior:'smooth', block:'end' });
+    let maxAllowedPages = 0;
 
-    setProgress(100);
-    document.getElementById('status-text').innerText = 'PIPELINE COMPLETE.';
-    document.getElementById('status-text').classList.remove('pulse-text');
-    generateBtn.innerText = 'INITIALIZE NEW SEQUENCE';
-    generateBtn.classList.remove('bg-transparent','text-white');
-    generateBtn.classList.add('bg-white','text-ink');
-    setTimeout(fetchAccountData, 3000);
-  } catch(e) {
-    console.error(e);
-    document.getElementById('status-text').innerText = `HALTED: ${e.message}`;
-    document.getElementById('status-text').classList.add('text-red-500');
-    generateBtn.innerText = 'RETRY PIPELINE';
-  } finally {
-    generateBtn.disabled = false;
-    generateBtn.classList.remove('pointer-events-none');
-  }
-};
+    const urlHash = new URLSearchParams(location.hash.slice(1));
+    let apiKey = urlHash.get('api_key');
 
-// ── PAGE BUILDERS ──────────────────────────────────────────
-function buildCoverPageHTML(ms, coverImg) {
-  const imgBlock = coverImg ? `<img src="${coverImg}" alt="Cover" class="w-64 h-auto mx-auto mb-10 shadow-2xl">` : '';
-  return `<div class="magazine-page flex flex-col justify-center items-center text-center">
-    <p class="text-xs font-sans tracking-[.4em] uppercase text-gray-400 mb-8 border-b border-gray-300 pb-2">Pollinations AI Exclusive</p>
-    ${imgBlock}
-    <h1 class="text-7xl md:text-[8rem] font-serif text-ink mb-10 leading-[.85] tracking-tighter uppercase px-4 break-words hyphens-auto">${escHtml(ms.title)}</h1>
-    <div class="w-24 h-px bg-ink mb-10"></div>
-    <p class="text-xl font-sans font-light text-gray-600 max-w-2xl mx-auto leading-relaxed px-8">${escHtml(ms.introduction)}</p>
-  </div>`;
-}
-function buildPageHTML(i, page, imgUrl, bookTitle) {
-  return `<div class="magazine-page" id="page-block-${i}">
-    <div class="mb-4 flex items-start justify-between gap-4">
-      <p class="text-xs font-sans tracking-[.3em] uppercase text-gray-400 border-b border-gray-200 pb-3 flex-1">Section 0${i+1} — ${escHtml(bookTitle)}</p>
-      <button class="regen-btn no-print" onclick="handleRegenPage(${i})" id="regen-btn-${i}">↺ Regenerate Section</button>
-    </div>
-    <h2 class="text-5xl md:text-7xl font-serif text-ink mb-10 tracking-tight leading-none">${escHtml(page.page_title)}</h2>
-    <img id="page-img-${i}" src="${imgUrl}" alt="Editorial" class="w-full h-[58vh] object-cover bg-gray-100 shadow-sm mb-10">
-    <div class="formatted-content" id="page-content-${i}">${page.content}</div>
-  </div>`;
-}
+    if(window.location.hash) {
+        window.history.replaceState(null, null, location.pathname);
+    }
 
-// ── REGEN SINGLE PAGE ──────────────────────────────────────
-async function handleRegenPage(i) {
-  if (!currentManuscript) return;
-  if (!checkPollen(0.003, 'regenerate this section')) return;
-  const btn = document.getElementById(`regen-btn-${i}`);
-  const imgEl = document.getElementById(`page-img-${i}`);
-  const contEl = document.getElementById(`page-content-${i}`);
-  btn.disabled = true; btn.innerText = '↺ Regenerating…';
-  try {
-    const page = currentManuscript.pages[i];
-    const style = document.getElementById('style').value;
-    const topic = document.getElementById('topic').value;
-    const custom = document.getElementById('custom-instructions').value;
+    // Cost logic map
+    const actionCosts = {
+        'generate_base': 0.0011, // Approximately 1 text generation + 1 flux image
+        'translate': 0.0005,
+        'critique': 0.0002,
+        'regenerate': 0.0002,
+        'audiobook': 0.0001
+    };
 
-    const [newContent, newPromptRaw] = await Promise.all([
-      chatCompletion([{ role:'user', content:`You are an elite magazine author. Rewrite ONLY the HTML content for this page.
-Page: "${page.page_title}" | Topic: "${topic}" | Style: "${style}"${custom ? ' | '+custom : ''}
-Return ONLY raw HTML using <p>,<h3>,<ul> tags. No JSON, no wrapper.` }], 0.65, false),
-      chatCompletion([{ role:'user', content:`Design one FLUX photography prompt for: "${page.page_title}" (${topic}, style: ${style}). Be specific about subject, lighting, lens, color. End with "award-winning editorial photography, masterpiece, 8k". NO TEXT in image. Return a single raw string.` }], 0.8, false)
-    ]);
-
-    currentManuscript.pages[i].content = newContent;
-    contEl.innerHTML = newContent;
-    imgEl.style.opacity = '0.3';
-    // FIX 2: pass old URL so it gets revoked after new blob is created
-    const url = await fetchImgBlob(newPromptRaw.trim(), currentImageUrls[i]);
-    currentImageUrls[i] = url;
-    imgEl.src = url; imgEl.style.opacity = '1';
-    btn.innerText = '✓ Done';
-    setTimeout(() => { btn.innerText = '↺ Regenerate Section'; btn.disabled = false; }, 3000);
-    setTimeout(fetchAccountData, 2000);
-  } catch(e) {
-    btn.innerText = '✕ Failed'; console.error(e);
-    setTimeout(() => { btn.innerText = '↺ Regenerate Section'; btn.disabled = false; }, 4000);
-  }
-}
-
-// ── TRANSLATE ──────────────────────────────────────────────
-async function handleTranslate() {
-  const lang = document.getElementById('translate-lang').value.trim();
-  if (!lang) { alert('Enter a target language.'); return; }
-  if (!currentManuscript) { alert('Generate a book first.'); return; }
-  if (!checkPollen(0.001, 'translate this book')) return;
-  const btn = document.getElementById('translate-btn');
-  btn.disabled = true; btn.innerText = 'Translating…';
-  try {
-    const payload = { title: currentManuscript.title, introduction: currentManuscript.introduction, pages: currentManuscript.pages.map(p => ({ page_title: p.page_title, content: p.content })) };
-    const raw = await chatCompletion([{ role:'user', content:`You are a master literary translator. Translate all text fields to "${lang}". Preserve ALL HTML tags exactly. Return identical JSON structure.\n\n${JSON.stringify(payload)}` }], 0.2);
-    const translated = parseAIJson(raw);
-    currentManuscript.title = translated.title;
-    currentManuscript.introduction = translated.introduction;
-    translated.pages.forEach((p, i) => { if (currentManuscript.pages[i]) { currentManuscript.pages[i].page_title = p.page_title; currentManuscript.pages[i].content = p.content; } });
-    const bc = document.getElementById('book-content');
-    bc.innerHTML = buildCoverPageHTML(currentManuscript, coverBlobUrl);
-    currentManuscript.pages.forEach((p,i) => { bc.innerHTML += buildPageHTML(i, p, currentImageUrls[i], currentManuscript.title); });
-    btn.innerText = `✓ ${lang}`; setTimeout(() => { btn.innerText = 'Translate'; btn.disabled = false; }, 3000);
-    setTimeout(fetchAccountData, 2000);
-  } catch(e) { btn.innerText = '✕ Failed'; setTimeout(() => { btn.innerText = 'Translate'; btn.disabled = false; }, 4000); }
-}
-
-// ── CRITIQUE ───────────────────────────────────────────────
-async function handleCritique() {
-  if (!currentManuscript) { alert('Generate a book first.'); return; }
-  if (critiqueOpen) { closeCritique(); return; }
-  if (!checkPollen(0.001, 'run the critique')) return;
-  const btn = document.getElementById('critique-btn');
-  btn.disabled = true; btn.innerText = 'Consulting…';
-  openCritiquePanel();
-  document.getElementById('critique-loading').classList.remove('hidden');
-  document.getElementById('critique-content').classList.add('hidden');
-  try {
-    const raw = await chatCompletion([{ role:'user', content:`You are the Editor-in-Chief of Vogue — demanding, brilliant, and eloquent. Critique this editorial book ruthlessly but fairly.
-
-TITLE: "${currentManuscript.title}"
-INTRO: "${currentManuscript.introduction}"
-PAGES: ${JSON.stringify(currentManuscript.pages.map(p => ({ title: p.page_title, excerpt: p.content.replace(/<[^>]*>/g,'').slice(0,400) })))}
-
-Return ONLY this JSON:
-{"score": 7, "summary": "One eloquent paragraph.", "dos": ["Strength 1"], "donts": ["Weakness 1"]}
-
-{\` }], 0.75);
-    // If we forced it with '{', the model might not have output the opening brace, so put it back
-    if (!raw.trim().startsWith('{')) { raw = '{' + raw; }
-    const c = parseAIJson(raw);
-    const score = Math.max(0, Math.min(10, parseInt(c.score)||0));
-    document.getElementById('score-ring').style.setProperty('--score', score);
-    document.getElementById('score-display').innerText = score;
-    document.getElementById('critique-summary').innerText = c.summary || '';
-    const dosList = document.getElementById('critique-dos'); dosList.innerHTML = '';
-    const dontsList = document.getElementById('critique-donts'); dontsList.innerHTML = '';
-    (c.dos||[]).forEach(d => { const li = document.createElement('li'); li.className='text-xs font-sans font-light text-white/70 leading-relaxed pl-3 border-l border-emerald-500/40'; li.innerText=d; dosList.appendChild(li); });
-    (c.donts||[]).forEach(d => { const li = document.createElement('li'); li.className='text-xs font-sans font-light text-white/70 leading-relaxed pl-3 border-l border-red-500/40'; li.innerText=d; dontsList.appendChild(li); });
-    document.getElementById('critique-loading').classList.add('hidden');
-    document.getElementById('critique-content').classList.remove('hidden');
-    btn.innerText = '✕ Close Critique';
-    setTimeout(fetchAccountData, 2000);
-  } catch(e) { closeCritique(); showPollenErr(`Critique failed: ${e.message}`); btn.innerText = '✦ Critique'; }
-  finally { btn.disabled = false; }
-}
-function openCritiquePanel() { critiqueOpen=true; document.getElementById('critique-panel').classList.add('open'); document.getElementById('book-outer').classList.add('split'); document.getElementById('critique-btn').classList.add('toggled'); }
-function closeCritique(silent=false) { critiqueOpen=false; document.getElementById('critique-panel').classList.remove('open'); document.getElementById('book-outer').classList.remove('split'); const b=document.getElementById('critique-btn'); if(b){b.classList.remove('toggled'); if(!silent) b.innerText='✦ Critique';} }
-
-// ── AUDIO PANEL ─────────────────────────────────────────────
-function toggleAudioPanel() {
-  const p = document.getElementById('audio-panel');
-  p.classList.toggle('hidden');
-  document.getElementById('audio-btn').classList.toggle('toggled', !p.classList.contains('hidden'));
-}
-
-// ── AUDIOBOOK GENERATION ────────────────────────────────────
-async function generateAudiobook() {
-  if (!currentManuscript) { alert('Generate a book first.'); return; }
-  const elKey = document.getElementById('el-api-key').value.trim();
-  const voice = document.getElementById('el-voice').value;
-  const isEL = !!elKey;
-
-  // ElevenLabs voices have long IDs; Pollinations voices are short words
-  const isELVoice = voice.length > 10;
-  const useEL = isEL && isELVoice;
-  if (!useEL && !checkPollen(0.002, 'generate the audiobook')) return;
-
-  const btn = document.getElementById('gen-audio-btn');
-  btn.disabled = true; btn.innerText = 'Generating…';
-  document.getElementById('audio-progress').classList.remove('hidden');
-  document.getElementById('audio-tracks').innerHTML = '';
-
-  const pages = [
-    { title: 'Introduction', text: currentManuscript.introduction },
-    ...currentManuscript.pages.map(p => ({ title: p.page_title, text: p.content.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim() }))
-  ];
-
-  let done = 0;
-  for (const seg of pages) {
-    document.getElementById('audio-status').innerText = `Synthesizing: "${seg.title}"…`;
-    document.getElementById('audio-prog-bar').style.width = (done/pages.length*100)+'%';
-    try {
-      let audioUrl;
-      if (useEL) {
-        // ElevenLabs TTS
-        const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}`, {
-          method:'POST',
-          headers:{ 'xi-api-key': elKey, 'Content-Type':'application/json', 'Accept':'audio/mpeg' },
-          body: JSON.stringify({ text: seg.text.slice(0,4900), model_id:'eleven_turbo_v2', voice_settings:{ stability:0.4, similarity_boost:0.8 } })
+    function showGlobalError(msg) {
+        const errDiv = document.createElement('div');
+        errDiv.className = "bg-red-600/90 text-white font-sans text-[0.65rem] tracking-[0.2em] uppercase px-8 py-4 shadow-2xl transition-all duration-500 border border-red-400 backdrop-blur-sm opacity-0 transform translate-y-[-20px]";
+        errDiv.innerHTML = msg;
+        toastContainer.appendChild(errDiv);
+        
+        requestAnimationFrame(() => {
+            errDiv.style.opacity = '1';
+            errDiv.style.transform = 'translate-y-0';
         });
-        if (!r.ok) throw new Error(`ElevenLabs error ${r.status}`);
-        audioUrl = URL.createObjectURL(await r.blob());
-      } else {
-        // FIX 1: Correct Pollinations TTS endpoint is audio.pollinations.ai
-        const polVoice = isELVoice ? 'nova' : voice;
-        const r = await fetchWithRetry(
-          `https://audio.pollinations.ai/${encodeURIComponent(seg.text.slice(0,1000))}?voice=${polVoice}&private=true`,
-          { headers:{ Authorization:`Bearer ${apiKey}` } }
-        );
-        audioUrl = URL.createObjectURL(await r.blob());
-      }
-      const track = document.createElement('div');
-      track.className = 'audio-player';
-      track.innerHTML = `<p class="text-[.58rem] font-sans tracking-[.2em] uppercase text-white/50 mb-1">${escHtml(seg.title)}</p><audio controls src="${audioUrl}"></audio><a href="${audioUrl}" download="${escHtml(seg.title)}.mp3" class="text-[.55rem] underline text-white/30 hover:text-white/60 ml-1">↓ Download</a>`;
-      document.getElementById('audio-tracks').appendChild(track);
-    } catch(err) {
-      const errEl = document.createElement('p');
-      errEl.className = 'text-[.6rem] text-red-400 font-sans pl-2';
-      errEl.innerText = `✕ "${seg.title}" — ${err.message}`;
-      document.getElementById('audio-tracks').appendChild(errEl);
+
+        setTimeout(() => {
+            errDiv.style.opacity = '0';
+            errDiv.style.transform = 'translate-y-[-20px]';
+            setTimeout(() => errDiv.remove(), 500);
+        }, 4000);
     }
-    done++;
-  }
-  document.getElementById('audio-prog-bar').style.width = '100%';
-  document.getElementById('audio-status').innerText = 'Audiobook complete.';
-  document.getElementById('audio-status').classList.remove('pulse-text');
-  btn.innerText = '↺ Regenerate Audio'; btn.disabled = false;
-  if (!useEL) setTimeout(fetchAccountData, 2000);
-}
 
-// ── EPUB EXPORT ─────────────────────────────────────────────
-async function handleEpubExport() {
-  if (!currentManuscript) { alert('Generate a book first.'); return; }
-  const btn = document.getElementById('epub-btn');
-  btn.disabled = true; btn.innerText = '📦 Building EPUB…';
-  try {
-    const zip = new JSZip();
-    const title = currentManuscript.title;
-    const id = 'ai-editorial-' + Date.now();
+    // Feature 6: Central Validation Check
+    function checkBalance(action, amountMultiplier = 1) {
+        const cost = (actionCosts[action] || 0) * amountMultiplier;
+        
+        if (currentBalance < cost) {
+            showGlobalError("Insufficient pollen. Please refill to continue.");
+            return false;
+        }
+        return true;
+    }
 
-    // mimetype (must be first, uncompressed)
-    zip.file('mimetype', 'application/epub+zip', { compression:'STORE' });
+    if (apiKey) {
+        authBtn.classList.add('hidden');
+        authWarning.classList.add('hidden');
+        appWrapper.classList.remove('hidden');
+        userStatus.classList.remove('hidden');
+        fetchAccountData();
+    } else {
+        authWarning.classList.remove('hidden');
+        if (window.location.protocol === 'about:' || window.location.protocol === 'blob:') {
+            authWarning.innerHTML += `
+                <p class="text-xs font-sans tracking-widest uppercase text-red-500 mt-8 border border-red-500/30 p-4 bg-red-500/10">
+                    SYSTEM ERROR: PREVIEW SANDBOX DETECTED.<br>RUN LOCALLY (.html file) OR DEPLOY TO GITHUB PAGES TO PROCEED.
+                </p>
+            `;
+        } else {
+            authBtn.classList.remove('hidden');
+            const params = new URLSearchParams({
+                redirect_url: window.location.href.split('#')[0],
+                permissions: 'profile,balance'
+            });
+            authBtn.href = `https://enter.pollinations.ai/authorize?${params}`;
+            authBtn.target = "_top";
+        }
+    }
 
-    // META-INF
-    zip.file('META-INF/container.xml', `<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>`);
-
-    // CSS
-    const css = `body{font-family:Georgia,serif;margin:2em auto;max-width:700px;line-height:1.8;color:#111}h1,h2,h3{font-family:Georgia,serif;line-height:1.2}p{margin:1em 0;text-indent:1.5em}h3{font-size:1.3em;margin-top:2em;border-bottom:1px solid #ccc;padding-bottom:.3em}img{max-width:100%;height:auto;display:block;margin:1.5em auto}`;
-    zip.file('OEBPS/style.css', css);
-
-    // Pages
-    const spineItems = [];
-    const manifestItems = [`<item id="css" href="style.css" media-type="text/css"/>`];
-
-    // Cover page
-    const coverHtml = `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><title>${escHtml(title)}</title><link rel="stylesheet" href="style.css"/></head><body><h1>${escHtml(title)}</h1><p><em>${escHtml(currentManuscript.introduction)}</em></p></body></html>`;
-    zip.file('OEBPS/cover.xhtml', coverHtml);
-    manifestItems.push(`<item id="cover" href="cover.xhtml" media-type="application/xhtml+xml"/>`);
-    spineItems.push(`<itemref idref="cover"/>`);
-
-    // Content pages (convert images to base64 where possible)
-    for (let i = 0; i < currentManuscript.pages.length; i++) {
-      const page = currentManuscript.pages[i];
-      let imgTag = '';
-      if (currentImageUrls[i]) {
+    async function fetchAccountData() {
         try {
-          const resp = await fetch(currentImageUrls[i]);
-          const blob = await resp.blob();
-          const b64 = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result.split(',')[1]); fr.readAsDataURL(blob); });
-          zip.file(`OEBPS/img${i}.jpg`, b64, { base64:true });
-          manifestItems.push(`<item id="img${i}" href="img${i}.jpg" media-type="image/jpeg"/>`);
-          imgTag = `<img src="img${i}.jpg" alt=""/>`;
-        } catch(_) {}
-      }
-      const pageHtml = `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><title>${escHtml(page.page_title)}</title><link rel="stylesheet" href="style.css"/></head><body><h2>${escHtml(page.page_title)}</h2>${imgTag}${page.content}</body></html>`;
-      zip.file(`OEBPS/page${i}.xhtml`, pageHtml);
-      manifestItems.push(`<item id="page${i}" href="page${i}.xhtml" media-type="application/xhtml+xml"/>`);
-      spineItems.push(`<itemref idref="page${i}"/>`);
+            const balRes = await fetch('https://gen.pollinations.ai/account/balance', {
+                headers: { 'Authorization': `Bearer ${apiKey}` }
+            });
+            const balData = await balRes.json();
+            
+            const balance = balData.balance !== undefined ? parseFloat(balData.balance) : parseFloat(balData);
+            currentBalance = isNaN(balance) ? 0 : balance;
+            pollenBalanceEl.innerText = currentBalance.toFixed(3);
+
+            maxAllowedPages = Math.floor(currentBalance / actionCosts.generate_base);
+            maxPagesDisplay.innerText = maxAllowedPages;
+            pagesInput.max = maxAllowedPages;
+
+            const profRes = await fetch('https://gen.pollinations.ai/account/profile', {
+                headers: { 'Authorization': `Bearer ${apiKey}` }
+            });
+            if (profRes.ok) {
+                const profData = await profRes.json();
+                if(profData.tier) {
+                    tierBadgeEl.innerText = profData.tier.toUpperCase();
+                }
+            }
+
+            pagesInput.addEventListener('input', (e) => {
+                const requestedPages = parseInt(e.target.value);
+                if (requestedPages > maxAllowedPages) {
+                    pageWarning.classList.remove('hidden');
+                    generateBtn.disabled = true;
+                    generateBtn.classList.add('opacity-30', 'pointer-events-none');
+                } else {
+                    pageWarning.classList.add('hidden');
+                    generateBtn.disabled = false;
+                    generateBtn.classList.remove('opacity-30', 'pointer-events-none');
+                }
+            });
+        } catch (err) {
+            console.error(err);
+        }
     }
 
-    // OPF
-    const opf = `<?xml version="1.0" encoding="UTF-8"?><package xmlns="http://www.idpf.org/2007/opf" unique-identifier="uid" version="2.0"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf"><dc:title>${escHtml(title)}</dc:title><dc:language>en</dc:language><dc:identifier id="uid">${id}</dc:identifier><dc:creator>AI Editorial Studio × Pollinations AI</dc:creator></metadata><manifest>${manifestItems.join('')}</manifest><spine toc="ncx">${spineItems.join('')}</spine></package>`;
-    zip.file('OEBPS/content.opf', opf);
+    function parseAIJson(rawStr) {
+        try {
+            let cleaned = rawStr.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, '').trim();
+            const firstBrace = cleaned.indexOf('{');
+            const lastBrace = cleaned.lastIndexOf('}');
+            if (firstBrace !== -1 && lastBrace !== -1) {
+                cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+            }
+            return JSON.parse(cleaned);
+        } catch (err) {
+            console.error("Failed parsing AI JSON: ", rawStr);
+            throw new Error("Invalid format received from Generator");
+        }
+    }
 
-    // NCX
-    const navPoints = spineItems.map((_, i) => {
-      if (i === 0) return `<navPoint id="np0" playOrder="1"><navLabel><text>${escHtml(title)}</text></navLabel><content src="cover.xhtml"/></navPoint>`;
-      const pg = currentManuscript.pages[i-1];
-      return `<navPoint id="np${i}" playOrder="${i+1}"><navLabel><text>${escHtml(pg.page_title)}</text></navLabel><content src="page${i-1}.xhtml"/></navPoint>`;
-    });
-    zip.file('OEBPS/toc.ncx', `<?xml version="1.0"?><ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="${id}"/></head><docTitle><text>${escHtml(title)}</text></docTitle><navMap>${navPoints.join('')}</navMap></ncx>`);
+    // Core Rendering Function
+    function renderBookView() {
+        if (!window.currentManuscript) return;
 
-    const blob = await zip.generateAsync({ type:'blob', mimeType:'application/epub+zip' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = title.replace(/[^a-z0-9]/gi,'_').slice(0,50) + '.epub';
-    a.click();
-    btn.innerText = '✓ EPUB Downloaded';
-    setTimeout(() => { btn.innerText = '📦 Download EPUB'; btn.disabled = false; }, 3000);
-  } catch(e) {
-    console.error(e);
-    btn.innerText = '✕ Export Failed'; btn.disabled = false;
-  }
-}
-</script>
+        let html = `
+            <div class="magazine-page flex flex-col justify-center items-center text-center px-4">
+                <p class="text-[0.65rem] font-sans tracking-[0.4em] uppercase text-gray-500 mb-8 border-b border-gray-300 pb-2 font-semibold">Pollinations AI Exclusive</p>
+                <h1 class="text-6xl md:text-[8rem] font-serif text-ink mb-12 leading-[0.85] tracking-tighter uppercase px-4 break-words hyphens-auto w-full">${window.currentManuscript.title}</h1>
+                <div class="w-24 h-[1px] bg-ink mb-12"></div>
+                <p class="text-lg md:text-2xl font-sans font-light text-gray-600 max-w-2xl mx-auto leading-relaxed px-4 md:px-8">${window.currentManuscript.introduction}</p>
+            </div>
+        `;
+
+        for (let i = 0; i < window.currentManuscript.pages.length; i++) {
+            const page = window.currentManuscript.pages[i];
+            const imgUrl = window.currentImages[i] || 'https://via.placeholder.com/1280x720';
+            
+            html += `
+                <div class="magazine-page relative transition-opacity duration-500" id="page-wrapper-${i}">
+                    <div class="mb-16">
+                        <p class="text-[0.6rem] md:text-xs font-sans tracking-[0.3em] uppercase text-gray-400 mb-4 border-b border-gray-200 pb-4 flex justify-between">
+                            <span>Section 0${i + 1} &mdash; ${window.currentManuscript.title}</span>
+                        </p>
+                        <h2 id="page-title-${i}" class="text-4xl md:text-6xl lg:text-7xl font-serif text-ink mb-12 tracking-tight leading-none break-words">${page.page_title}</h2>
+                        <img src="${imgUrl}" alt="Editorial Concept" class="w-full h-[50vh] md:h-[60vh] object-cover bg-gray-100 grayscale-[15%] contrast-[1.15] shadow-sm transition-all hover:grayscale-0">
+                    </div>
+                    <div id="page-content-${i}" class="formatted-content px-4 md:px-0">
+                        ${page.content}
+                    </div>
+                    
+                    <!-- Feature 3: Per-Page Regeneration Button -->
+                    <div class="mt-16 pt-10 border-t border-gray-200 text-center no-print">
+                        <button onclick="regeneratePage(${i})" class="text-[0.65rem] font-sans tracking-[0.2em] uppercase text-ink/70 border border-ink/20 px-8 py-3 hover:bg-ink hover:text-white transition-all transform hover:-translate-y-0.5" id="regen-btn-${i}">
+                            Regenerate Section
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        bookContent.innerHTML = html;
+        bookContainer.scrollTop = 0;
+    }
+
+    generateBtn.onclick = async () => {
+        const topic = document.getElementById('topic').value;
+        const style = document.getElementById('style').value;
+        const customInstr = document.getElementById('custom-instructions').value;
+        const pagesCount = parseInt(document.getElementById('pages-count').value);
+
+        if(!topic || !style) {
+            showGlobalError("Subject Matter and Art Direction are required.");
+            return;
+        }
+
+        if(!checkBalance('generate_base', pagesCount)) return;
+
+        try {
+            generateBtn.disabled = true;
+            generateBtn.innerText = "PIPELINE ACTIVE";
+            generateBtn.classList.add('bg-transparent', 'text-white', 'pointer-events-none');
+            
+            statusContainer.classList.remove('hidden');
+
+            window.currentTopic = topic;
+            window.currentStyle = style;
+            window.currentCustom = customInstr; // Store for per-page regeneration Feature 4
+
+            // Feature 4 Integration: Inject custom instructions directly into generation prompt
+            const instructionsInjection = customInstr ? `\n\nCRITICAL PARAMETER (CUSTOM INSTRUCTIONS): ${customInstr}\nYou MUST respect these instructions exactly.` : '';
+
+            statusText.innerText = "[ AGENT 01 ] ARCHITECTING MANUSCRIPT & EDITORIAL COPY...";
+            
+            const authorPrompt = `You are a visionary Editor-in-Chief for a high-end magazine.
+            Write a profound, highly sophisticated editorial piece about "${topic}".
+            It must be exactly ${pagesCount} pages long.${instructionsInjection}
+
+            FORMATTING RULES:
+            1. Write high-value, insightful, and beautifully paced paragraphs.
+            2. Format the "content" field in HTML: Use <p> for paragraphs, <h3> for sub-headers, and <ul> for lists. No markdown wrapping.
+            
+            Return ONLY a valid JSON object:
+            {
+                "title": "A profound, elegant title",
+                "introduction": "A sophisticated preamble/hook.",
+                "pages":[
+                    {
+                        "page_title": "Chapter Heading",
+                        "content": "<p>Content...</p>"
+                    }
+                ]
+            }`;
+
+            const authorRes = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'openai',
+                    messages:[{ role: 'user', content: authorPrompt }],
+                    response_format: { type: "json_object" },
+                    temperature: 0.5 
+                })
+            });
+
+            if(!authorRes.ok) throw new Error("AGENT 01 FAILED");
+            const authorData = await authorRes.json();
+            const manuscript = parseAIJson(authorData.choices[0].message.content);
+            window.currentManuscript = manuscript;
+
+            statusText.innerText = "[ AGENT 02 ] ANALYZING TEXT & DIRECTING VISUAL CONCEPTS...";
+
+            const artDirectorPrompt = `You are an Elite Art Director & Photography Expert.
+            I will give you a ${pagesCount}-page manuscript. 
+            For EACH page, read the title and content, and design a breathtaking, award-winning photography prompt for an AI image generator (FLUX).
+            The global visual aesthetic must be: "${style}".
+
+            RULES FOR IMAGE PROMPTS:
+            1. Describe the subject, the lighting (e.g., volumetric, cinematic, chiaroscuro), the camera lens, and the exact environment.
+            2. End every prompt with: "masterpiece, 8k resolution, highly detailed, high-end editorial photography".
+            3. CRITICAL: NO TEXT, NO LETTERS, NO TYPOGRAPHY IN THE IMAGE. 
+
+            MANUSCRIPT:
+            ${JSON.stringify(manuscript.pages)}
+
+            Return ONLY a valid JSON object containing exactly ${pagesCount} strings:
+            {
+                "image_prompts": [
+                    "Prompt for page 1...",
+                    "Prompt for page 2..."
+                ]
+            }`;
+
+            const artRes = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'openai',
+                    messages: [{ role: 'user', content: artDirectorPrompt }],
+                    response_format: { type: "json_object" },
+                    temperature: 0.7 
+                })
+            });
+
+            if(!artRes.ok) throw new Error("AGENT 02 FAILED");
+            const artData = await artRes.json();
+            const artDirection = parseAIJson(artData.choices[0].message.content);
+            window.currentImages = [];
+
+            for (let i = 0; i < manuscript.pages.length; i++) {
+                const visualConcept = artDirection.image_prompts[i] || `${topic}, ${style}, masterpiece, 8k`;
+                statusText.innerText = `[ RENDERER ] SYNTHESIZING VISUALS: PAGE 0${i + 1} OF 0${manuscript.pages.length}...`;
+
+                const imgRes = await fetch(`https://gen.pollinations.ai/image/${encodeURIComponent(visualConcept)}?model=flux&width=1280&height=720`, {
+                    headers: { 'Authorization': `Bearer ${apiKey}` }
+                });
+
+                if(!imgRes.ok) throw new Error("RENDERER FAILED ON PAGE " + (i+1));
+                window.currentImages.push(URL.createObjectURL(await imgRes.blob()));
+            }
+
+            statusText.innerText = "PIPELINE COMPLETE. TRANSITIONING VIEWPORT.";
+            
+            // Switch view
+            mainView.classList.add('hidden');
+            workspaceContainer.classList.remove('hidden');
+            renderBookView();
+            
+            setTimeout(fetchAccountData, 3000); 
+
+        } catch (err) {
+            console.error(err);
+            showGlobalError(`SYSTEM HALTED: ${err.message}`);
+        } finally {
+            generateBtn.innerText = "INITIALIZE NEW SEQUENCE";
+            generateBtn.classList.remove('bg-transparent', 'text-white', 'pointer-events-none');
+            generateBtn.classList.add('bg-white', 'text-ink');
+            generateBtn.disabled = false;
+            statusText.classList.remove('pulse-text');
+        }
+    };
+
+    // Feature 3: Per-Page Regeneration Contextually Scoped
+    window.regeneratePage = async (index) => {
+        if(!checkBalance('regenerate')) return;
+        
+        const btn = document.getElementById(`regen-btn-${index}`);
+        const pageEl = document.getElementById(`page-wrapper-${index}`);
+        
+        const originalText = btn.innerText;
+        btn.innerText = "REWRITING...";
+        btn.disabled = true;
+        pageEl.style.opacity = '0.5';
+
+        try {
+            const customConfig = window.currentCustom ? `\n\nCRITICAL CUSTOM RULE: ${window.currentCustom}` : '';
+            const prompt = `You are rewriting a specific section of a luxury editorial.
+            Theme: ${window.currentTopic}
+            Tone: ${window.currentStyle}${customConfig}
+            
+            Original Concept Target: ${window.currentManuscript.pages[index].page_title}
+            Context: Maintain the high-end vocabulary and precise formatting. Write beautiful HTML inside the "content".
+            
+            Return ONLY valid JSON:
+            {
+                "page_title": "Sophisticated Section Heading",
+                "content": "<p>A breathtaking rewrite.</p>"
+            }`;
+
+            const res = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'openai',
+                    messages: [{ role: 'user', content: prompt }],
+                    response_format: { type: "json_object" },
+                    temperature: 0.6
+                })
+            });
+
+            if(!res.ok) throw new Error("API Failure");
+            const data = await res.json();
+            const newContent = parseAIJson(data.choices[0].message.content);
+            
+            window.currentManuscript.pages[index].page_title = newContent.page_title;
+            window.currentManuscript.pages[index].content = newContent.content;
+            
+            document.getElementById(`page-title-${index}`).innerHTML = newContent.page_title;
+            document.getElementById(`page-content-${index}`).innerHTML = newContent.content;
+            
+            setTimeout(fetchAccountData, 2000); 
+            
+        } catch(err) {
+            showGlobalError("Regeneration matrix failed.");
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+            pageEl.style.opacity = '1';
+        }
+    };
+
+    // Feature 1: Split-Screen Critique System
+    const critiqueBtn = document.getElementById('critique-btn');
+    document.getElementById('close-critique').onclick = () => {
+        critiquePanel.classList.remove('w-[400px]', 'md:w-[450px]');
+        critiquePanel.classList.add('w-0');
+        bookContainer.style.width = '100%';
+    };
+
+    critiqueBtn.onclick = async () => {
+        if (critiquePanel.classList.contains('w-[400px]') || critiquePanel.classList.contains('md:w-[450px]')) {
+            // Already open -> CLOSE
+            critiquePanel.classList.remove('w-[400px]', 'md:w-[450px]');
+            critiquePanel.classList.add('w-0');
+            bookContainer.style.width = '100%';
+            return;
+        }
+
+        if(!checkBalance('critique')) return;
+
+        // OPEN split screen
+        critiquePanel.classList.remove('w-0');
+        critiquePanel.classList.add('w-[400px]', 'md:w-[450px]');
+        // Decrease book container width nicely
+        bookContainer.style.width = 'calc(100% - 450px)';
+        
+        critiqueContent.innerHTML = '<p class="text-sm tracking-widest text-white/50 animate-pulse uppercase">Vogue Persona Loading...</p>';
+
+        try {
+            const prompt = `Act as the Editor-in-Chief of Vogue. Your tone must be elite, extremely sharp, slightly pretentious, and deeply analytical.
+            Score this editorial layout out of 10. Give exactly three "Dos" (what worked beautifully) and exactly three "Don'ts" (what failed conceptually).
+            Return ONLY valid JSON:
+            {
+                "score": "8.5/10",
+                "dos": ["Masterful pacing", "The Bauhaus minimalism shone"],
+                "donts": ["Page 2 was pedestrian", "Lacked a daring hook"],
+                "summary": "A sharp, albeit conceptually timid, execution of a breathtaking topic."
+            }
+            Manuscript to Review: ${JSON.stringify(window.currentManuscript)}`;
+
+            const res = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'openai',
+                    messages: [{ role: 'user', content: prompt }],
+                    response_format: { type: "json_object" },
+                    temperature: 0.6
+                })
+            });
+
+            if(!res.ok) throw new Error("Critique system down.");
+            const data = await res.json();
+            const result = parseAIJson(data.choices[0].message.content);
+
+            critiqueContent.innerHTML = `
+                <div class="mb-8">
+                    <p class="text-[5rem] font-serif text-white mb-0 leading-none">${result.score}</p>
+                    <p class="text-[0.6rem] tracking-[0.3em] text-white/40 uppercase border-b border-white/20 pb-4 mt-2">Editorial Verdict</p>
+                </div>
+                
+                <div class="mb-8">
+                    <h4 class="text-[0.7rem] tracking-[0.3em] uppercase text-white mb-4 bg-white/5 py-2 px-3 inline-block">The Masterstrokes</h4>
+                    <ul class="list-none space-y-3">
+                        ${result.dos.map(d => `<li class="text-sm font-light text-white/80 before:content-['✓'] before:mr-3 before:text-green-500">${d}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="mb-8 border-b border-white/20 pb-8">
+                    <h4 class="text-[0.7rem] tracking-[0.3em] uppercase text-white mb-4 bg-white/5 py-2 px-3 inline-block">The Failures</h4>
+                    <ul class="list-none space-y-3">
+                        ${result.donts.map(d => `<li class="text-sm font-light text-white/80 before:content-['✗'] before:mr-3 before:text-red-500">${d}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-[0.7rem] tracking-[0.3em] uppercase text-white mb-3">Final Word</h4>
+                    <p class="text-base font-serif italic text-white/80 leading-relaxed">"${result.summary}"</p>
+                </div>
+            `;
+            setTimeout(fetchAccountData, 2000); 
+        } catch(e) {
+            showGlobalError("The Editor is currently traveling. Try later.");
+            critiquePanel.classList.remove('w-[400px]', 'md:w-[450px]');
+            critiquePanel.classList.add('w-0');
+            bookContainer.style.width = '100%';
+        }
+    };
+
+    // Feature 2: Smart Translation Matrix
+    const translateBtn = document.getElementById('translate-btn');
+    translateBtn.onclick = async () => {
+        const lang = document.getElementById('target-language').value;
+        if(!lang) return showGlobalError("Please input a linguistic target.");
+        if(!checkBalance('translate')) return;
+
+        translateBtn.innerText = "PROCESSING...";
+        translateBtn.disabled = true;
+
+        try {
+            // Reusing memory images implicitly because window.currentImages is unchanged
+            const prompt = `You are a high-end luxury translator fluent in ${lang}.
+            Translate the following JSON manuscript content into ${lang}.
+            CRITICAL: Retain the EXACT strict JSON structure and keys ("title", "introduction", "pages", "page_title", "content"). You must provide valid JSON.
+            
+            JSON Payload:
+            ${JSON.stringify(window.currentManuscript)}`;
+
+            const res = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'openai',
+                    messages: [{ role: 'user', content: prompt }],
+                    response_format: { type: "json_object" },
+                    temperature: 0.2
+                })
+            });
+
+            if(!res.ok) throw new Error("Translation failed.");
+            const data = await res.json();
+            
+            window.currentManuscript = parseAIJson(data.choices[0].message.content);
+            renderBookView(); 
+            showGlobalError(`SUCCESSFUL TRANSLATION TO ${lang.toUpperCase()}`);
+            setTimeout(fetchAccountData, 2000); 
+
+        } catch(e) {
+            showGlobalError("Translation engine failed to map linguistics.");
+        } finally {
+            translateBtn.innerText = "TRANSLATE";
+            translateBtn.disabled = false;
+        }
+    };
+
+    // Feature 7: Audiobook Generation Pipeline (ElevenLabs)
+    const ttsBtn = document.getElementById('tts-btn');
+    ttsBtn.onclick = async () => {
+        if(!checkBalance('audiobook')) return;
+
+        const elApiKey = prompt("AUDIOBOOK PIPELINE\n\nEnter your ElevenLabs API Key for high-fidelity voice synthesis.\n(Leave blank to simulate via Web Speech API)");
+        
+        let fullText = window.currentManuscript.title + ". " + window.currentManuscript.introduction + ". ";
+        window.currentManuscript.pages.forEach(p => {
+            let cleanText = p.content.replace(/<[^>]+>/g, ' '); 
+            fullText += p.page_title + ". " + cleanText + ". ";
+        });
+
+        if(!elApiKey) {
+            // Fallback simulated execution
+            const utterance = new SpeechSynthesisUtterance(fullText);
+            utterance.rate = 0.9;
+            utterance.pitch = 0.9;
+            window.speechSynthesis.speak(utterance);
+            showGlobalError("SIMULATED AUDIOBOOK: WEBSPEECH ENGINE ACTIVE");
+            return;
+        }
+
+        try {
+            ttsBtn.querySelector('span').innerText = "GENERATING...";
+            ttsBtn.disabled = true;
+
+            const response = await fetch("https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM", {
+                method: "POST",
+                headers: {
+                    "Accept": "audio/mpeg",
+                    "Content-Type": "application/json",
+                    "xi-api-key": elApiKey
+                },
+                body: JSON.stringify({
+                    text: fullText.substring(0, 4900), // Protect against massive token runs
+                    model_id: "eleven_monolingual_v1",
+                    voice_settings: { stability: 0.5, similarity_boost: 0.5 }
+                })
+            });
+
+            if(!response.ok) throw new Error("ElevenLabs authentication or synthesis failure.");
+            
+            const blob = await response.blob();
+            const audioUrl = URL.createObjectURL(blob);
+            const audio = new Audio(audioUrl);
+            audio.play();
+
+            showGlobalError("AUDIOBOOK MATRIX ACTIVE");
+            setTimeout(fetchAccountData, 2000); 
+            
+        } catch(e) {
+            showGlobalError(e.message);
+        } finally {
+            console.log("Audiobook operation ended");
+            ttsBtn.disabled = false;
+            if (ttsBtn.querySelector('span')) {
+                ttsBtn.querySelector('span').innerText = "AUDIOBOOK";
+            }
+        }
+    }
+    </script>
 </body>
 </html>
