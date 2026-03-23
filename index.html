@@ -423,15 +423,27 @@ document.getElementById('pages-count').addEventListener('input', e => {
 
 // ── HELPERS ────────────────────────────────────────────────
 function parseAIJson(raw) {
+  // Strip markdown code blocks
   let s = raw.replace(/```json/g,'').replace(/```/g,'').trim();
-  const a = s.indexOf('{'), b = s.lastIndexOf('}');
-  if (a !== -1 && b !== -1) s = s.slice(a, b+1);
+
+  // Handle preamble (e.g., "Here is the JSON: { ... }") or cut off completion
+  const a = s.indexOf('{');
+  const b = s.lastIndexOf('}');
+  
+  if (a === -1) {
+    throw new Error('AI returned no JSON structure at all.');
+  }
+  
+  // If it didn't finish the JSON, pretend it did for the parser's sake
+  s = b !== -1 ? s.slice(a, b + 1) : s.slice(a) + ']}';
+
   // Strip JS comments
   s = s.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
   // Remove trailing commas before } or ]
   s = s.replace(/,\s*([\]}])/g, '$1');
   // Fix smart/curly quotes
   s = s.replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
+
   // Escape literal newlines/tabs INSIDE JSON string values (DeepSeek main issue)
   let fixed = '', inStr = false, esc = false;
   for (let i = 0; i < s.length; i++) {
@@ -593,8 +605,10 @@ CRITICAL JSON RULES:
 - Do NOT add trailing commas.
 - Do NOT add comments.
 
-Return this exact structure:
-{"title": "An original title", "introduction": "A 2-3 sentence hook.", "pages": [{"page_title": "Chapter name", "content": "<p>All HTML content on one line like this.</p><p>Next paragraph.</p>"}]}`;
+Return this exact JSON structure and absolutely nothing else. DO NOT WRITE A PREAMBLE:
+{"title": "An original title", "introduction": "A 2-3 sentence hook.", "pages": [{"page_title": "Chapter name", "content": "<p>All HTML content on one line like this.</p><p>Next paragraph.</p>"}]}
+
+{\`;
 }
 
 // ── REFINED ART DIRECTOR PROMPT ────────────────────────────
@@ -616,8 +630,10 @@ PROMPT ENGINEERING RULES:
 PAGES:
 ${JSON.stringify(pages.map(p => ({ title: p.page_title, excerpt: p.content.replace(/<[^>]*>/g,'').slice(0,300) })))}
 
-Return ONLY this JSON (exactly ${pages.length} prompts):
-{ "image_prompts": ["Prompt 1...", "Prompt 2..."] }`;
+Return this JSON (exactly ${pages.length} strings) and nothing else:
+{"image_prompts": ["Prompt 1...", "Prompt 2..."]}
+
+{\`;
 }
 
 // ── GENERATE PIPELINE ──────────────────────────────────────
@@ -647,13 +663,16 @@ generateBtn.onclick = async () => {
     // AGENT 01 — AUTHOR
     document.getElementById('status-text').innerText = '[ AGENT 01 ] CRAFTING MANUSCRIPT…';
     const authorRaw = await chatCompletion([{ role:'user', content: buildAuthorPrompt(topic, style, pages, custom) }], 0.6);
-    currentManuscript = parseAIJson(authorRaw);
+    // If the model didn't start its response with the { we forced in the prompt, add it back
+    const safeAuthorRaw = authorRaw.trim().startsWith('{') ? authorRaw : '{' + authorRaw;
+    currentManuscript = parseAIJson(safeAuthorRaw);
     setProgress(30);
 
     // AGENT 02 — ART DIRECTOR
     document.getElementById('status-text').innerText = '[ AGENT 02 ] DIRECTING VISUAL CONCEPTS…';
     const artRaw = await chatCompletion([{ role:'user', content: buildArtPrompt(currentManuscript.pages, style, topic) }], 0.75);
-    currentArtDirection = parseAIJson(artRaw);
+    const safeArtRaw = artRaw.trim().startsWith('{') ? artRaw : '{' + artRaw;
+    currentArtDirection = parseAIJson(safeArtRaw);
     setProgress(45);
 
     // AGENT 03 — RENDERER
@@ -796,7 +815,11 @@ INTRO: "${currentManuscript.introduction}"
 PAGES: ${JSON.stringify(currentManuscript.pages.map(p => ({ title: p.page_title, excerpt: p.content.replace(/<[^>]*>/g,'').slice(0,400) })))}
 
 Return ONLY this JSON:
-{ "score": 7, "summary": "One elegant editor's letter paragraph.", "dos": ["Strength 1","Strength 2","Strength 3"], "donts": ["Weakness 1","Weakness 2","Weakness 3"] }` }], 0.75);
+{"score": 7, "summary": "One eloquent paragraph.", "dos": ["Strength 1"], "donts": ["Weakness 1"]}
+
+{\` }], 0.75);
+    // If we forced it with '{', the model might not have output the opening brace, so put it back
+    if (!raw.trim().startsWith('{')) { raw = '{' + raw; }
     const c = parseAIJson(raw);
     const score = Math.max(0, Math.min(10, parseInt(c.score)||0));
     document.getElementById('score-ring').style.setProperty('--score', score);
