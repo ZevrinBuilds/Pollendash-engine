@@ -5,14 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Editorial Studio | Powered by Pollinations</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans:['Montserrat', 'sans-serif'], serif:['Cormorant Garamond', 'serif'] },
-                    colors: { cream: '#F9F9F6', ink: '#0A0A0A' }
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                        serif: ['Cormorant Garamond', 'serif'],
+                    },
+                    colors: {
+                        cream: '#F9F9F6',
+                        ink: '#0A0A0A',
+                    }
                 }
             }
         }
@@ -21,78 +28,236 @@
     <style>
         html { scroll-behavior: smooth; }
         body { background-color: #050505; color: #ffffff; overflow-x: hidden; }
-        
-        /* Cinematic Video Background */
-        .video-bg { position: fixed; right: 0; bottom: 0; min-width: 100%; min-height: 100%; z-index: -2; object-fit: cover; opacity: 0.5; filter: grayscale(30%) contrast(120%); }
-        .video-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; background: linear-gradient(180deg, rgba(5,5,5,0.4) 0%, rgba(5,5,5,0.95) 100%); }
 
-        /* Inputs */
-        .luxury-input { background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: #ffffff; font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; width: 100%; padding: 0.5rem 0; transition: all 0.4s ease; border-radius: 0; }
-        .luxury-input:focus { outline: none; border-bottom: 1px solid rgba(255,255,255,1); }
+        /* Video Background */
+        .video-bg {
+            position: fixed; right: 0; bottom: 0;
+            min-width: 100%; min-height: 100%;
+            width: auto; height: auto; z-index: -2;
+            object-fit: cover; opacity: 0.5;
+            filter: grayscale(30%) contrast(120%);
+        }
+        .video-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            background: linear-gradient(180deg, rgba(5,5,5,0.4) 0%, rgba(5,5,5,0.95) 100%);
+        }
+
+        /* Swiss Luxury Inputs */
+        .luxury-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            color: #ffffff;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            width: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.4s ease;
+            border-radius: 0;
+        }
+        .luxury-input:focus {
+            outline: none;
+            border-bottom: 1px solid rgba(255,255,255,1);
+            background: transparent;
+        }
         .luxury-input::placeholder { color: rgba(255,255,255,0.15); }
 
-        /* Split-Screen Animation Architecture */
-        #main-container { transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1); width: 100%; float: left; }
-        .split-active #main-container { width: 65%; }
-        
-        #review-panel { 
-            position: fixed; right: 0; top: 0; width: 35%; height: 100vh; 
-            transform: translateX(100%); transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1); 
-            background: #0A0A0A; border-left: 1px solid rgba(255,255,255,0.1); 
-            overflow-y: auto; z-index: 100; padding: 3rem; box-shadow: -20px 0 50px rgba(0,0,0,0.5);
+        /* ============================================================
+           SPLIT-SCREEN LAYOUT
+        ============================================================ */
+        #output-area {
+            display: flex;
+            transition: all 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+            position: relative;
         }
-        .split-active #review-panel { transform: translateX(0); }
+        #book-outer {
+            flex: 1 1 100%;
+            transition: flex 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+            min-width: 0;
+        }
+        #critique-panel {
+            flex: 0 0 0%;
+            overflow: hidden;
+            transition: flex 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+            background: #08080A;
+            display: flex;
+            flex-direction: column;
+        }
+        #critique-panel.open {
+            flex: 0 0 42%;
+        }
+        #book-outer.split {
+            flex: 0 0 58%;
+        }
 
-        /* Magazine Layout */
+        /* Critique Panel Inner */
+        #critique-inner {
+            padding: 3rem 2.5rem;
+            overflow-y: auto;
+            height: 100%;
+            border-left: 1px solid rgba(255,255,255,0.07);
+        }
+        #critique-inner::-webkit-scrollbar { width: 3px; }
+        #critique-inner::-webkit-scrollbar-track { background: #08080A; }
+        #critique-inner::-webkit-scrollbar-thumb { background: #2a2a2a; }
+
+        /* Score Ring */
+        .score-ring {
+            width: 110px; height: 110px;
+            border-radius: 50%;
+            background: conic-gradient(#fff calc(var(--score) * 36deg), #1a1a1a 0deg);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .score-ring::before {
+            content: '';
+            position: absolute;
+            width: 84px; height: 84px;
+            border-radius: 50%;
+            background: #08080A;
+        }
+        .score-ring span {
+            position: relative; z-index: 1;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem; color: #fff;
+        }
+
+        /* Magazine Print Layout */
         .magazine-wrapper { background: #F9F9F6; color: #0A0A0A; }
-        .magazine-page { page-break-after: always; padding: 6rem 4rem; max-width: 1200px; margin: 0 auto; min-height: 100vh; position: relative; }
-        .formatted-content { column-count: 2; column-gap: 4rem; text-align: justify; }
+        .magazine-page { page-break-after: always; padding: 6rem 4rem; max-width: 1200px; margin: 0 auto; min-height: 100vh; }
+
+        .formatted-content {
+            column-count: 2;
+            column-gap: 4rem;
+            text-align: justify;
+        }
         .formatted-content p { font-family: 'Montserrat', sans-serif; font-size: 0.95rem; line-height: 2; margin-bottom: 1.5rem; font-weight: 300; color: #222; }
-        .formatted-content > p:first-of-type::first-letter { float: left; font-size: 6.5rem; line-height: 0.7; padding-top: 8px; padding-right: 12px; font-family: 'Cormorant Garamond', serif; font-weight: 400; color: #0A0A0A; }
-        .formatted-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; border-bottom: 1px solid #ddd; margin-top: 2rem; margin-bottom: 1rem; padding-bottom: 0.5rem; column-span: all; }
-        .formatted-content ul, .formatted-content ol { margin-left: 1rem; margin-bottom: 2rem; font-size: 0.95rem; line-height: 2; font-weight: 300;}
+        .formatted-content > p:first-of-type::first-letter {
+            float: left; font-size: 6.5rem; line-height: 0.7; padding-top: 8px; padding-right: 12px;
+            font-family: 'Cormorant Garamond', serif; font-weight: 400; color: #0A0A0A;
+        }
+        .formatted-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 400; color: #000; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid #ddd; padding-bottom: 0.5rem; column-span: all; }
+        .formatted-content ul, .formatted-content ol { font-family: 'Montserrat', sans-serif; margin-left: 1rem; margin-bottom: 2rem; color: #333; font-size: 0.95rem; line-height: 2; font-weight: 300; }
+        .formatted-content li { margin-bottom: 0.5rem; }
+        .formatted-content strong { font-weight: 500; color: #000; }
 
-        /* Floating Post-Gen Dock */
-        #post-gen-dock { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(150%); transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); z-index: 90; }
-        #post-gen-dock.dock-active { transform: translateX(-50%) translateY(0); }
+        /* Regenerate Button on pages */
+        .regen-btn {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #888;
+            border: 1px solid #ddd;
+            background: transparent;
+            padding: 0.5rem 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            float: right;
+        }
+        .regen-btn:hover { color: #000; border-color: #000; }
+        .regen-btn:disabled { opacity: 0.4; pointer-events: none; }
 
+        /* Pollen Error Flash */
+        @keyframes errorFlash {
+            0%, 100% { background: transparent; }
+            50% { background: rgba(239, 68, 68, 0.08); }
+        }
+        .pollen-error-flash { animation: errorFlash 0.4s ease 0s 3; }
+
+        /* Scrollbar */
         ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; }
 
+        /* Loading pulse */
         .pulse-text { animation: pulseOpacity 2s infinite; }
         @keyframes pulseOpacity { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-        @media print { 
-            .no-print, .video-bg, .video-overlay, #post-gen-dock, #review-panel { display: none !important; }
+        /* Pollinations Logo SVG-style mark */
+        .pollinations-mark {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            text-decoration: none;
+        }
+        .pollinations-mark svg { width: 18px; height: 18px; opacity: 0.7; }
+        .pollinations-mark:hover svg { opacity: 1; }
+
+        @media print {
+            .no-print, .video-bg, .video-overlay { display: none !important; }
             body, .magazine-wrapper { background: white !important; color: black !important; }
             .magazine-page { padding: 0; max-width: 100%; margin: 0; }
             .formatted-content { column-count: 2; column-gap: 3rem; }
-            #main-container { width: 100% !important; }
         }
+
+        /* Toolbar action buttons */
+        .action-btn {
+            font-size: 0.65rem;
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.7);
+            background: transparent;
+            padding: 0.6rem 1.4rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .action-btn:hover { border-color: rgba(255,255,255,0.7); color: #fff; }
+        .action-btn:disabled { opacity: 0.3; pointer-events: none; }
+        .action-btn.toggled { border-color: #fff; color: #fff; background: rgba(255,255,255,0.05); }
+
+        .translate-input {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 0.3rem 0.5rem;
+            width: 130px;
+            outline: none;
+            text-transform: uppercase;
+        }
+        .translate-input::placeholder { color: rgba(255,255,255,0.3); text-transform: none; }
     </style>
 </head>
 <body class="antialiased min-h-screen relative selection:bg-white selection:text-black">
 
+    <!-- Cinematic Video Background -->
     <video autoplay loop muted playsinline class="video-bg no-print">
         <source src="https://cdn.coverr.co/videos/coverr-dark-abstract-waves-2641/1080p.mp4" type="video/mp4">
     </video>
     <div class="video-overlay no-print"></div>
 
-    <!-- Transparent Nav with Pollinations Logo -->
-    <nav class="w-full flex flex-col md:flex-row justify-between items-center p-8 md:px-12 no-print z-50 fixed top-0 left-0 mix-blend-difference gap-4">
-        <div class="flex items-center gap-4">
-            <img src="https://raw.githubusercontent.com/pollinations/pollinations/main/assets/logo.svg" alt="Pollinations Logo" class="h-8 w-8 filter invert opacity-90">
-            <div class="flex flex-col">
-                <h1 class="text-sm font-sans tracking-[0.3em] uppercase text-white font-light">E-Book Studio</h1>
-                <p class="text-[0.6rem] font-sans tracking-[0.2em] uppercase text-white/50 mt-1">Engine Powered by Pollinations AI</p>
-            </div>
+    <!-- ============================================================
+         NAV — with Pollinations Logo
+    ============================================================ -->
+    <nav class="w-full flex flex-col md:flex-row justify-between items-center p-8 md:px-16 no-print z-50 fixed top-0 left-0 mix-blend-difference gap-4">
+        <div class="flex flex-col items-center md:items-start">
+            <h1 class="text-sm font-sans tracking-[0.3em] uppercase text-white font-light">E-Book Studio</h1>
+            <!-- Pollinations attribution in nav -->
+            <a href="https://pollinations.ai" target="_blank" class="pollinations-mark mt-1">
+                <!-- Pollinations flower-inspired icon -->
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="2.5" fill="white"/>
+                    <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity="0.6" transform="rotate(0 12 12)"/>
+                    <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity="0.6" transform="rotate(60 12 12)"/>
+                    <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity="0.6" transform="rotate(120 12 12)"/>
+                    <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity="0.5" transform="rotate(180 12 12)"/>
+                    <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity="0.5" transform="rotate(240 12 12)"/>
+                    <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity="0.5" transform="rotate(300 12 12)"/>
+                </svg>
+                <span class="text-[0.55rem] font-sans tracking-[0.2em] uppercase text-white/50">Pollinations AI</span>
+            </a>
         </div>
-        
+
         <a id="auth-btn" class="text-xs font-sans tracking-[0.2em] uppercase text-white border-b border-white/30 pb-1 hover:border-white transition-all cursor-pointer hidden">
             Authenticate Node
         </a>
-        
+
         <div id="user-status" class="hidden flex items-center space-x-6">
             <span id="tier-badge" class="text-[0.6rem] font-sans tracking-[0.3em] uppercase text-white border border-white/20 px-3 py-1">SPORE</span>
             <span class="text-xs font-sans tracking-[0.2em] uppercase text-white">
@@ -101,118 +266,214 @@
         </div>
     </nav>
 
-    <!-- Main Content Wrapper (For Split Screen) -->
-    <div id="main-container">
-        
-        <!-- Setup Interface -->
-        <main id="setup-view" class="relative w-full min-h-screen flex flex-col items-center justify-center px-6 pt-32 pb-20 no-print">
-            <div id="auth-warning" class="text-center mb-16 hidden">
-                <h2 class="text-4xl md:text-6xl font-serif text-white mb-6 tracking-tight">Access Restricted</h2>
-                <p class="text-xs font-sans tracking-[0.2em] uppercase text-white/60 max-w-lg mx-auto leading-loose border border-white/10 p-6 backdrop-blur-sm">
-                    Authentication required. Connect your Pollinations node to utilize the generation engine.
-                </p>
+    <!-- ============================================================
+         MAIN STUDIO INTERFACE
+    ============================================================ -->
+    <main class="relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-6 pt-32 pb-20 no-print">
+
+        <!-- Auth Warning -->
+        <div id="auth-warning" class="text-center mb-16 hidden">
+            <h2 class="text-4xl md:text-6xl font-serif text-white mb-6 tracking-tight">Access Restricted</h2>
+            <p class="text-xs font-sans tracking-[0.2em] uppercase text-white/60 max-w-lg mx-auto leading-loose border border-white/10 p-6 backdrop-blur-sm">
+                Authentication required. Connect your Pollinations node to utilize the multi-modal generation engine at zero platform cost.
+            </p>
+        </div>
+
+        <!-- The Studio Form -->
+        <div id="app-wrapper" class="hidden w-full max-w-4xl mx-auto mt-12">
+
+            <div id="limits-dashboard" class="mb-20 flex justify-between items-end border-b border-white/10 pb-4">
+                <p class="text-xs font-sans tracking-[0.2em] uppercase text-white/40">Allocated Bandwidth</p>
+                <p class="text-sm font-sans tracking-[0.2em] text-white"><span id="max-pages-display" class="font-medium text-lg">0</span> MAX PAGES</p>
             </div>
 
-            <div id="app-wrapper" class="hidden w-full max-w-4xl mx-auto mt-12">
-                <div id="limits-dashboard" class="mb-16 flex justify-between items-end border-b border-white/10 pb-4">
-                    <p class="text-xs font-sans tracking-[0.2em] uppercase text-white/40">Allocated Bandwidth</p>
-                    <p class="text-sm font-sans tracking-[0.2em] text-white"><span id="max-pages-display" class="font-medium text-lg">0</span> MAX PAGES</p>
+            <div class="space-y-16">
+                <!-- Input 1: Subject -->
+                <div class="group">
+                    <label class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase transition-colors group-focus-within:text-white">01 &mdash; Subject Matter</label>
+                    <input type="text" id="topic" placeholder="e.g. The Architecture of Minimalist Sound" class="luxury-input">
                 </div>
 
-                <div class="space-y-12">
-                    <div class="group">
-                        <label class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase group-focus-within:text-white">01 &mdash; Subject Matter</label>
-                        <input type="text" id="topic" placeholder="e.g. The Architecture of Minimalist Sound" class="luxury-input">
-                    </div>
-                    <div class="group">
-                        <label class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase group-focus-within:text-white">02 &mdash; Art Direction & Tone</label>
-                        <input type="text" id="style" placeholder="e.g. Bauhaus, High-Contrast, Melancholic" class="luxury-input">
-                    </div>
-                    <div class="group">
-                        <label class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase group-focus-within:text-white">03 &mdash; Custom Instructions (Optional)</label>
-                        <input type="text" id="custom-prompt" placeholder="e.g. Focus on historical facts, write in 2nd person..." class="luxury-input text-2xl">
-                    </div>
-                    <div class="group">
-                        <label class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase group-focus-within:text-white">04 &mdash; Page Count</label>
-                        <input type="number" id="pages-count" value="4" min="1" class="luxury-input w-32">
-                        <p id="page-warning" class="text-[0.65rem] font-sans tracking-widest text-red-500 mt-4 hidden uppercase">Insufficient Pollen Balance</p>
-                    </div>
+                <!-- Input 2: Style -->
+                <div class="group">
+                    <label class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase transition-colors group-focus-within:text-white">02 &mdash; Art Direction & Tone</label>
+                    <input type="text" id="style" placeholder="e.g. Bauhaus, High-Contrast, Melancholic" class="luxury-input">
                 </div>
-                
-                <div class="mt-20 pt-10 text-center flex flex-col items-center">
-                    <button id="generate-btn" class="text-sm font-sans tracking-[0.3em] uppercase text-ink bg-white border border-white px-16 py-6 hover:bg-transparent hover:text-white transition-all duration-700 w-full md:w-auto shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:shadow-none">
-                        Initialize Dual-Agent Pipeline
-                    </button>
-                    <div id="status-container" class="mt-12 h-8 hidden">
-                        <p id="status-text" class="text-xs font-sans tracking-[0.2em] uppercase text-white pulse-text"></p>
-                    </div>
+
+                <!-- Input 3: Pages -->
+                <div class="group">
+                    <label class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase transition-colors group-focus-within:text-white">03 &mdash; Page Count</label>
+                    <input type="number" id="pages-count" value="4" min="1" class="luxury-input w-32">
+                    <p id="page-warning" class="text-[0.65rem] font-sans tracking-widest text-red-500 mt-4 hidden uppercase">Insufficient Pollen Balance for this request</p>
+                </div>
+
+                <!-- Input 4: Custom Instructions -->
+                <div class="group">
+                    <label class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase transition-colors group-focus-within:text-white">04 &mdash; Custom Instructions</label>
+                    <input type="text" id="custom-instructions" placeholder="e.g. Focus on sustainability, avoid clichés, write in second-person" class="luxury-input">
                 </div>
             </div>
-        </main>
 
-        <!-- Rendered Output -->
-        <div id="book-container" class="hidden w-full bg-cream relative">
+            <!-- Generate Button -->
+            <div class="mt-24 pt-10 text-center flex flex-col items-center">
+                <button id="generate-btn" class="text-sm font-sans tracking-[0.3em] uppercase text-ink bg-white border border-white px-16 py-6 hover:bg-transparent hover:text-white transition-all duration-700 w-full md:w-auto shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:shadow-none">
+                    Initialize Dual-Agent Pipeline
+                </button>
+                <div id="status-container" class="mt-12 h-8 hidden">
+                    <p id="status-text" class="text-xs font-sans tracking-[0.2em] uppercase text-white pulse-text"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ============================================================
+         OUTPUT AREA — Split Screen Container
+    ============================================================ -->
+    <div id="output-area" class="hidden w-full bg-cream z-20 relative">
+
+        <!-- LEFT: Book -->
+        <div id="book-outer" class="min-w-0">
+            <!-- Sticky Toolbar -->
+            <div class="no-print sticky top-0 z-30 bg-ink border-b border-white/10 px-6 py-4 flex flex-wrap items-center gap-3">
+                <!-- Left side: PDF export -->
+                <button onclick="window.print()" class="action-btn">
+                    Export PDF
+                </button>
+
+                <!-- Translate controls -->
+                <div class="flex items-center gap-2">
+                    <input type="text" id="translate-lang" placeholder="e.g. Japanese" class="translate-input" />
+                    <button id="translate-btn" class="action-btn" onclick="handleTranslate()">Translate</button>
+                </div>
+
+                <!-- Critique toggle -->
+                <button id="critique-btn" class="action-btn" onclick="handleCritique()">
+                    ✦ Critique
+                </button>
+
+                <!-- Right: attribution -->
+                <div class="ml-auto flex items-center gap-2">
+                    <p class="text-[0.55rem] font-sans tracking-[0.2em] uppercase text-white/30">Rendered via</p>
+                    <a href="https://pollinations.ai" target="_blank" class="pollinations-mark">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="2.5" fill="white"/>
+                            <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity="0.6" transform="rotate(0 12 12)"/>
+                            <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity="0.6" transform="rotate(60 12 12)"/>
+                            <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity="0.6" transform="rotate(120 12 12)"/>
+                            <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity="0.5" transform="rotate(180 12 12)"/>
+                            <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity="0.5" transform="rotate(240 12 12)"/>
+                            <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity="0.5" transform="rotate(300 12 12)"/>
+                        </svg>
+                        <span class="text-[0.55rem] font-sans tracking-[0.2em] uppercase text-white/50">Pollinations AI</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Pollen error banner (hidden by default) -->
+            <div id="pollen-error-banner" class="hidden no-print bg-red-950 border border-red-500/40 px-6 py-3 text-center">
+                <p id="pollen-error-msg" class="text-[0.65rem] font-sans tracking-[0.2em] uppercase text-red-400">⚠ Insufficient Pollen — You need more pollen to perform this action.</p>
+            </div>
+
+            <!-- Book Content -->
             <div class="magazine-wrapper" id="book-content"></div>
 
-            <div class="text-center py-20 bg-ink border-t border-white/10 no-print">
-                <img src="https://raw.githubusercontent.com/pollinations/pollinations/main/assets/logo.svg" alt="Pollinations Logo" class="h-12 w-12 mx-auto filter invert opacity-50 mb-6">
-                <p class="text-xs font-sans tracking-[0.3em] uppercase text-white/40">Concept to Reality</p>
-                <p class="text-sm font-serif italic text-white/60 mt-2 tracking-wide">Thank you to Pollinations.ai for providing the multi-modal ecosystem.</p>
+            <!-- Footer with Pollinations branding -->
+            <footer class="bg-cream border-t border-gray-200 py-16 text-center">
+                <div class="flex flex-col items-center gap-4">
+                    <a href="https://pollinations.ai" target="_blank" class="flex items-center gap-3 no-underline group">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="opacity-40 group-hover:opacity-80 transition-opacity">
+                            <circle cx="12" cy="12" r="2.5" fill="#0A0A0A"/>
+                            <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="#0A0A0A" opacity="0.6" transform="rotate(0 12 12)"/>
+                            <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="#0A0A0A" opacity="0.6" transform="rotate(60 12 12)"/>
+                            <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="#0A0A0A" opacity="0.6" transform="rotate(120 12 12)"/>
+                            <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="#0A0A0A" opacity="0.5" transform="rotate(180 12 12)"/>
+                            <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="#0A0A0A" opacity="0.5" transform="rotate(240 12 12)"/>
+                            <ellipse cx="12" cy="6" rx="2" ry="3.5" fill="#0A0A0A" opacity="0.5" transform="rotate(300 12 12)"/>
+                        </svg>
+                        <span class="font-serif text-2xl text-gray-400 italic group-hover:text-gray-700 transition-colors">Pollinations.ai</span>
+                    </a>
+                    <p class="text-xs font-sans tracking-[0.3em] uppercase text-gray-400">A Luxury Thank You</p>
+                    <p class="text-sm font-serif italic text-gray-500 max-w-md leading-relaxed">
+                        This editorial universe was conjured entirely through the free, open-source intelligence of <span class="text-gray-700">Pollinations AI</span> — the API ecosystem powering a new generation of creative tools.
+                    </p>
+                </div>
+            </footer>
+        </div>
+
+        <!-- RIGHT: Critique Panel (slides in) -->
+        <div id="critique-panel">
+            <div id="critique-inner">
+                <div id="critique-loading" class="flex flex-col items-center justify-center h-full gap-6 hidden">
+                    <p class="text-xs font-sans tracking-[0.3em] uppercase text-white/40 pulse-text">Consulting the Editor-in-Chief…</p>
+                </div>
+                <div id="critique-content" class="hidden">
+                    <!-- Score -->
+                    <div class="flex flex-col items-center gap-4 mb-10 pt-4">
+                        <p class="text-[0.55rem] font-sans tracking-[0.3em] uppercase text-white/30">Vogue Editor's Verdict</p>
+                        <div class="score-ring" style="--score: 0;" id="score-ring">
+                            <span id="score-display">0</span>
+                        </div>
+                        <p class="text-[0.6rem] font-sans tracking-[0.2em] uppercase text-white/40">out of 10</p>
+                    </div>
+
+                    <div class="w-full h-[1px] bg-white/10 mb-10"></div>
+
+                    <!-- Summary -->
+                    <div class="mb-10">
+                        <p class="text-[0.55rem] font-sans tracking-[0.3em] uppercase text-white/30 mb-4">Editor's Note</p>
+                        <p id="critique-summary" class="text-sm font-serif italic text-white/80 leading-relaxed"></p>
+                    </div>
+
+                    <!-- Dos -->
+                    <div class="mb-8">
+                        <p class="text-[0.6rem] font-sans tracking-[0.2em] uppercase text-emerald-400 mb-4">✓ What Worked — The Dos</p>
+                        <ul id="critique-dos" class="space-y-2"></ul>
+                    </div>
+
+                    <!-- Don'ts -->
+                    <div class="mb-8">
+                        <p class="text-[0.6rem] font-sans tracking-[0.2em] uppercase text-red-400 mb-4">✕ What Failed — The Don'ts</p>
+                        <ul id="critique-donts" class="space-y-2"></ul>
+                    </div>
+
+                    <!-- Close -->
+                    <button onclick="closeCritique()" class="action-btn w-full mt-6 text-center">Close Critique</button>
+                </div>
             </div>
-        </div>
-    </div>
-
-    <!-- The Slide-Out Review Agent Panel -->
-    <div id="review-panel" class="no-print">
-        <div class="flex justify-between items-center mb-12 border-b border-white/10 pb-6">
-            <h2 class="text-sm font-sans tracking-[0.3em] uppercase text-white">AI Critique Agent</h2>
-            <button onclick="document.body.classList.remove('split-active')" class="text-white/50 hover:text-white text-2xl">&times;</button>
-        </div>
-        <div id="review-content" class="text-white/80 font-sans font-light text-sm leading-loose">
-            <p class="pulse-text text-center text-xs tracking-widest uppercase mt-20">Analyzing semantics and editorial flow...</p>
-        </div>
-    </div>
-
-    <!-- Floating Post-Generation Dock -->
-    <div id="post-gen-dock" class="no-print flex items-center gap-1 bg-ink/90 backdrop-blur-md border border-white/10 p-2 rounded-none shadow-2xl">
-        <button onclick="window.print()" class="text-[0.65rem] font-sans tracking-[0.2em] uppercase text-white hover:bg-white/10 px-6 py-4 transition">
-            ↓ Download PDF
-        </button>
-        <div class="w-[1px] h-8 bg-white/10 mx-2"></div>
-        <button onclick="runReviewAgent()" class="text-[0.65rem] font-sans tracking-[0.2em] uppercase text-white hover:bg-white/10 px-6 py-4 transition flex items-center gap-2">
-            <span class="text-yellow-500">★</span> Critique Editorial
-        </button>
-        <div class="w-[1px] h-8 bg-white/10 mx-2"></div>
-        <div class="flex items-center">
-            <input type="text" id="target-lang" placeholder="Target Language (e.g. French)" class="bg-transparent border-b border-white/20 text-white text-[0.65rem] font-sans tracking-widest uppercase px-4 py-2 w-48 focus:outline-none focus:border-white placeholder-white/30">
-            <button onclick="runTranslationAgent()" class="text-[0.65rem] font-sans tracking-[0.2em] uppercase text-ink bg-white px-6 py-4 ml-2 hover:bg-gray-200 transition">
-                Translate
-            </button>
         </div>
     </div>
 
     <script>
-    const authBtn = document.getElementById('auth-btn');
-    const authWarning = document.getElementById('auth-warning');
-    const appWrapper = document.getElementById('app-wrapper');
-    const userStatus = document.getElementById('user-status');
-    const pollenBalanceEl = document.getElementById('pollen-balance');
-    const generateBtn = document.getElementById('generate-btn');
-    const statusText = document.getElementById('status-text');
-    const bookContent = document.getElementById('book-content');
-    
-    // Global State for App
-    let apiKey = new URLSearchParams(location.hash.slice(1)).get('api_key');
-    let currentBalance = 0;
-    
-    // Global State for Generated Book
-    let globalManuscript = null;
-    let globalArtDirection = null;
-    let globalImageUrls =[]; 
-    let currentTopic = "";
-    let currentStyle = "";
+    // ================================================================
+    //  GLOBAL STATE
+    // ================================================================
+    let apiKey = null;
+    let maxAllowedPages = 0;
+    let currentPollenBalance = 0;
+    let currentManuscript = null;   // { title, introduction, pages: [{page_title, content}] }
+    let currentImageUrls = [];      // parallel array of blob URLs matching manuscript.pages
+    let currentArtDirection = null; // { image_prompts: [] }
+    let critiqueOpen = false;
 
-    if(window.location.hash) window.history.replaceState(null, null, location.pathname);
+    // ================================================================
+    //  AUTH BOOTSTRAP
+    // ================================================================
+    const authBtn      = document.getElementById('auth-btn');
+    const authWarning  = document.getElementById('auth-warning');
+    const appWrapper   = document.getElementById('app-wrapper');
+    const userStatus   = document.getElementById('user-status');
+    const maxPagesDisplay = document.getElementById('max-pages-display');
+    const pagesInput   = document.getElementById('pages-count');
+    const pageWarning  = document.getElementById('page-warning');
+    const pollenBalanceEl = document.getElementById('pollen-balance');
+    const tierBadgeEl  = document.getElementById('tier-badge');
+
+    const urlHash = new URLSearchParams(location.hash.slice(1));
+    apiKey = urlHash.get('api_key');
+
+    if (window.location.hash) {
+        window.history.replaceState(null, null, location.pathname);
+    }
 
     if (apiKey) {
         authBtn.classList.add('hidden');
@@ -223,246 +484,586 @@
     } else {
         authWarning.classList.remove('hidden');
         if (window.location.protocol === 'about:' || window.location.protocol === 'blob:') {
-            authWarning.innerHTML += `<p class="text-xs font-sans tracking-widest uppercase text-red-500 mt-8 border border-red-500/30 p-4 bg-red-500/10">SYSTEM ERROR: SANDBOX PREVIEW.<br>SAVE AS HTML FILE TO PROCEED.</p>`;
+            authWarning.innerHTML += `
+                <p class="text-xs font-sans tracking-widest uppercase text-red-500 mt-8 border border-red-500/30 p-4 bg-red-500/10">
+                    SYSTEM ERROR: PREVIEW SANDBOX DETECTED.<br>RUN LOCALLY (.html file) OR DEPLOY TO GITHUB PAGES TO PROCEED.
+                </p>`;
         } else {
             authBtn.classList.remove('hidden');
-            const params = new URLSearchParams({ redirect_url: window.location.href.split('#')[0], permissions: 'profile,balance' });
+            const params = new URLSearchParams({
+                redirect_url: window.location.href.split('#')[0],
+                permissions: 'profile,balance'
+            });
             authBtn.href = `https://enter.pollinations.ai/authorize?${params}`;
-            authBtn.target = "_top";
+            authBtn.target = '_top';
         }
     }
 
+    // ================================================================
+    //  ACCOUNT DATA
+    // ================================================================
     async function fetchAccountData() {
         try {
-            const balRes = await fetch('https://gen.pollinations.ai/account/balance', { headers: { 'Authorization': `Bearer ${apiKey}` } });
-            const balData = await balRes.json();
-            currentBalance = balData.balance !== undefined ? parseFloat(balData.balance) : parseFloat(balData);
-            pollenBalanceEl.innerText = isNaN(currentBalance) ? "0.00" : currentBalance.toFixed(3);
-
-            let maxPages = isNaN(currentBalance) ? 0 : Math.floor(currentBalance / 0.0011);
-            document.getElementById('max-pages-display').innerText = maxPages;
-            document.getElementById('pages-count').max = maxPages;
-
-            document.getElementById('pages-count').addEventListener('input', (e) => {
-                const btn = document.getElementById('generate-btn');
-                if (parseInt(e.target.value) > maxPages) {
-                    document.getElementById('page-warning').classList.remove('hidden');
-                    btn.disabled = true; btn.classList.add('opacity-30', 'pointer-events-none');
-                } else {
-                    document.getElementById('page-warning').classList.add('hidden');
-                    btn.disabled = false; btn.classList.remove('opacity-30', 'pointer-events-none');
-                }
+            const balRes = await fetch('https://gen.pollinations.ai/account/balance', {
+                headers: { 'Authorization': `Bearer ${apiKey}` }
             });
-        } catch (err) { console.error(err); }
-    }
+            const balData = await balRes.json();
+            currentPollenBalance = balData.balance !== undefined ? parseFloat(balData.balance) : parseFloat(balData);
+            if (isNaN(currentPollenBalance)) currentPollenBalance = 0;
 
-    function parseAIJson(rawStr) {
-        let cleaned = rawStr.replace(/```json/g, '').replace(/```/g, '').trim();
-        const first = cleaned.indexOf('{'); const last = cleaned.lastIndexOf('}');
-        return JSON.parse(cleaned.slice(first, last + 1));
-    }
+            pollenBalanceEl.innerText = currentPollenBalance.toFixed(3);
+            maxAllowedPages = Math.floor(currentPollenBalance / 0.0011);
+            maxPagesDisplay.innerText = maxAllowedPages;
+            pagesInput.max = maxAllowedPages;
 
-    async function aiTextCall(prompt, temp = 0.5) {
-        const res = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ model: 'openai', messages:[{ role: 'user', content: prompt }], response_format: { type: "json_object" }, temperature: temp })
-        });
-        if(!res.ok) throw new Error("API ERROR");
-        const data = await res.json();
-        fetchAccountData(); // Refresh balance
-        return parseAIJson(data.choices[0].message.content);
-    }
-
-    async function aiImageCall(prompt) {
-        const res = await fetch(`https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}?model=flux&width=1280&height=720`, { headers: { 'Authorization': `Bearer ${apiKey}` } });
-        if(!res.ok) throw new Error("IMAGE API ERROR");
-        fetchAccountData(); // Refresh balance
-        return URL.createObjectURL(await res.blob());
-    }
-
-    // MAIN GENERATION LOOP
-    generateBtn.onclick = async () => {
-        currentTopic = document.getElementById('topic').value;
-        currentStyle = document.getElementById('style').value;
-        const customPrompt = document.getElementById('custom-prompt').value;
-        const pagesCount = parseInt(document.getElementById('pages-count').value);
-
-        if(!currentTopic || !currentStyle) return alert("Subject Matter and Art Direction are required.");
-        if(currentBalance < (pagesCount * 0.0011)) return alert("INSUFFICIENT POLLEN.");
-
-        try {
-            document.body.classList.remove('split-active');
-            document.getElementById('post-gen-dock').classList.remove('dock-active');
-            
-            generateBtn.disabled = true; generateBtn.innerText = "PIPELINE ACTIVE";
-            generateBtn.classList.add('bg-transparent', 'text-white', 'pointer-events-none');
-            
-            document.getElementById('setup-view').classList.add('hidden');
-            document.getElementById('book-container').classList.remove('hidden');
-            bookContent.innerHTML = '';
-            document.getElementById('status-container').classList.remove('hidden');
-
-            // 1. Author Agent
-            statusText.innerText = "[ AGENT 01 ] ARCHITECTING MANUSCRIPT...";
-            const aPrompt = `You are a visionary Editor-in-Chief. Write an editorial piece about "${currentTopic}". Exactly ${pagesCount} pages.
-            ${customPrompt ? 'CRITICAL CUSTOM INSTRUCTION: ' + customPrompt : ''}
-            Format "content" in HTML (<p>, <h3>, <ul>).
-            Return JSON: {"title":"...","introduction":"...","pages":[{"page_title":"...","content":"<p>...</p>"}]}`;
-            globalManuscript = await aiTextCall(aPrompt, 0.5);
-
-            // 2. Art Director Agent
-            statusText.innerText = "[ AGENT 02 ] DIRECTING VISUALS...";
-            const artPrompt = `Art Director: Design FLUX AI prompts for this manuscript. Style: "${currentStyle}".
-            End with: "masterpiece, 8k, cinematic lighting, editorial photography". NO TEXT IN IMAGES.
-            Manuscript: ${JSON.stringify(globalManuscript.pages)}
-            Return JSON: {"image_prompts":["prompt 1..."]}`;
-            globalArtDirection = await aiTextCall(artPrompt, 0.7);
-
-            // 3. Renderer
-            globalImageUrls =[];
-            renderCover();
-            
-            for (let i = 0; i < globalManuscript.pages.length; i++) {
-                statusText.innerText = `[ RENDERER ] SYNTHESIZING PAGE 0${i + 1}...`;
-                const prompt = globalArtDirection.image_prompts[i] || `${currentTopic}, ${currentStyle}, 8k`;
-                const imgUrl = await aiImageCall(prompt);
-                globalImageUrls.push(imgUrl);
-                renderPage(i);
-                document.getElementById('book-container').scrollIntoView({ behavior: 'smooth', block: 'end' });
+            const profRes = await fetch('https://gen.pollinations.ai/account/profile', {
+                headers: { 'Authorization': `Bearer ${apiKey}` }
+            });
+            if (profRes.ok) {
+                const profData = await profRes.json();
+                if (profData.tier) tierBadgeEl.innerText = profData.tier.toUpperCase();
             }
 
-            statusText.innerText = "PIPELINE COMPLETE."; statusText.classList.remove('pulse-text');
-            document.getElementById('post-gen-dock').classList.add('dock-active');
-            
+            pagesInput.addEventListener('input', (e) => {
+                if (parseInt(e.target.value) > maxAllowedPages) {
+                    pageWarning.classList.remove('hidden');
+                    generateBtn.disabled = true;
+                    generateBtn.classList.add('opacity-30', 'pointer-events-none');
+                } else {
+                    pageWarning.classList.add('hidden');
+                    generateBtn.disabled = false;
+                    generateBtn.classList.remove('opacity-30', 'pointer-events-none');
+                }
+            });
         } catch (err) {
-            console.error(err); alert(err.message);
-            location.reload();
+            console.error('fetchAccountData error:', err);
+        }
+    }
+
+    // ================================================================
+    //  POLLEN GUARD — checks balance before any paid action
+    // ================================================================
+    function checkPollenSufficient(requiredAmount, actionName) {
+        if (currentPollenBalance < requiredAmount) {
+            showPollenError(`⚠ You need more pollen to ${actionName}. Current balance: ${currentPollenBalance.toFixed(4)}`);
+            return false;
+        }
+        return true;
+    }
+
+    function showPollenError(msg) {
+        const banner = document.getElementById('pollen-error-banner');
+        const msgEl  = document.getElementById('pollen-error-msg');
+        msgEl.innerText = msg;
+        banner.classList.remove('hidden');
+        banner.classList.add('pollen-error-flash');
+        banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setTimeout(() => {
+            banner.classList.remove('pollen-error-flash');
+        }, 1300);
+        setTimeout(() => banner.classList.add('hidden'), 6000);
+    }
+
+    // ================================================================
+    //  JSON PARSER (robust)
+    // ================================================================
+    function parseAIJson(rawStr) {
+        let cleaned = rawStr.replace(/```json/g, '').replace(/```/g, '').trim();
+        const firstBrace = cleaned.indexOf('{');
+        const lastBrace  = cleaned.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1) {
+            cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+        }
+        return JSON.parse(cleaned);
+    }
+
+    // ================================================================
+    //  GENERATE PIPELINE
+    // ================================================================
+    const generateBtn      = document.getElementById('generate-btn');
+    const statusContainer  = document.getElementById('status-container');
+    const statusText       = document.getElementById('status-text');
+    const outputArea       = document.getElementById('output-area');
+    const bookContent      = document.getElementById('book-content');
+
+    generateBtn.onclick = async () => {
+        const topic      = document.getElementById('topic').value.trim();
+        const style      = document.getElementById('style').value.trim();
+        const pagesCount = parseInt(document.getElementById('pages-count').value);
+        const customInstructions = document.getElementById('custom-instructions').value.trim();
+
+        if (!topic || !style) {
+            alert('Subject Matter and Art Direction are required.');
+            return;
+        }
+
+        // Pollen guard: 1 image roughly 0.001, text 0.0001 per call
+        const estimatedCost = pagesCount * 0.0011 + 0.0002;
+        if (!checkPollenSufficient(estimatedCost, 'generate this book')) return;
+
+        try {
+            generateBtn.disabled = true;
+            generateBtn.innerText = 'PIPELINE ACTIVE';
+            generateBtn.classList.add('bg-transparent', 'text-white', 'pointer-events-none');
+
+            // Reset state
+            currentManuscript = null;
+            currentImageUrls = [];
+            currentArtDirection = null;
+            critiqueOpen = false;
+            closeCritique(true);
+
+            outputArea.classList.add('hidden');
+            bookContent.innerHTML = '';
+            statusContainer.classList.remove('hidden');
+
+            // ── AGENT 01: AUTHOR ──────────────────────────────────────
+            statusText.innerText = '[ AGENT 01 ] ARCHITECTING MANUSCRIPT & EDITORIAL COPY...';
+            statusText.classList.add('pulse-text');
+
+            const customBlock = customInstructions
+                ? `\nADDITIONAL AUTHOR DIRECTIVES:\n${customInstructions}\n`
+                : '';
+
+            const authorPrompt = `You are a visionary Editor-in-Chief for a high-end magazine (like Vogue or GQ).
+Write a profound, highly sophisticated editorial piece about "${topic}".
+It must be exactly ${pagesCount} pages long.
+${customBlock}
+FORMATTING RULES:
+1. Write high-value, insightful, and beautifully paced paragraphs.
+2. Format the "content" field in HTML: Use <p> for paragraphs, <h3> for elegant sub-headers, and <ul> for lists if needed. Do not use markdown inside the HTML.
+
+Return ONLY a valid JSON object:
+{
+    "title": "A profound, elegant title",
+    "introduction": "A sophisticated preamble/hook.",
+    "pages":[
+        {
+            "page_title": "Chapter Heading",
+            "content": "<p>Content...</p>"
+        }
+    ]
+}`;
+
+            const authorRes = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'openai',
+                    messages: [{ role: 'user', content: authorPrompt }],
+                    response_format: { type: 'json_object' },
+                    temperature: 0.5
+                })
+            });
+            if (!authorRes.ok) throw new Error('AGENT 01 FAILED');
+            const authorData = await authorRes.json();
+            currentManuscript = parseAIJson(authorData.choices[0].message.content);
+
+            // ── AGENT 02: ART DIRECTOR ─────────────────────────────────
+            statusText.innerText = '[ AGENT 02 ] ANALYZING TEXT & DIRECTING VISUAL CONCEPTS...';
+
+            const artDirectorPrompt = `You are an Elite Art Director & Photography Expert.
+I will give you a ${pagesCount}-page manuscript.
+For EACH page, read the title and content, and design a breathtaking, award-winning photography prompt for an AI image generator (FLUX).
+The global visual aesthetic must be: "${style}".
+
+RULES FOR IMAGE PROMPTS:
+1. Describe the subject, the lighting (e.g., volumetric, cinematic, chiaroscuro), the camera lens, and the exact environment.
+2. End every prompt with: "masterpiece, 8k resolution, highly detailed, high-end editorial photography".
+3. CRITICAL: NO TEXT, NO LETTERS, NO TYPOGRAPHY IN THE IMAGE.
+
+MANUSCRIPT:
+${JSON.stringify(currentManuscript.pages)}
+
+Return ONLY a valid JSON object containing exactly ${pagesCount} strings:
+{
+    "image_prompts": [
+        "Prompt for page 1...",
+        "Prompt for page 2..."
+    ]
+}`;
+
+            const artRes = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'openai',
+                    messages: [{ role: 'user', content: artDirectorPrompt }],
+                    response_format: { type: 'json_object' },
+                    temperature: 0.7
+                })
+            });
+            if (!artRes.ok) throw new Error('AGENT 02 FAILED');
+            const artData = await artRes.json();
+            currentArtDirection = parseAIJson(artData.choices[0].message.content);
+
+            // ── AGENT 03: RENDERER ─────────────────────────────────────
+            // Cover page
+            bookContent.innerHTML = buildCoverHTML(currentManuscript.title, currentManuscript.introduction);
+            outputArea.classList.remove('hidden');
+
+            for (let i = 0; i < currentManuscript.pages.length; i++) {
+                const page = currentManuscript.pages[i];
+                const visualConcept = currentArtDirection.image_prompts[i] || `${topic}, ${style}, masterpiece, 8k`;
+
+                statusText.innerText = `[ RENDERER ] SYNTHESIZING VISUALS: PAGE 0${i + 1} OF 0${currentManuscript.pages.length}...`;
+
+                const imgUrl = await fetchImageAsBlob(visualConcept);
+                currentImageUrls[i] = imgUrl;
+
+                bookContent.innerHTML += buildPageHTML(i, page, imgUrl, currentManuscript.title);
+                outputArea.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
+
+            statusText.innerText = 'PIPELINE COMPLETE. AWAITING EXPORT.';
+            statusText.classList.remove('pulse-text');
+            generateBtn.innerText = 'INITIALIZE NEW SEQUENCE';
+            generateBtn.classList.remove('bg-transparent', 'text-white');
+            generateBtn.classList.add('bg-white', 'text-ink');
+
+            setTimeout(fetchAccountData, 3000);
+
+        } catch (err) {
+            console.error(err);
+            statusText.innerText = `SYSTEM HALTED: ${err.message}`;
+            statusText.classList.remove('pulse-text');
+            statusText.classList.add('text-red-500');
+            generateBtn.innerText = 'RETRY PIPELINE';
+        } finally {
+            generateBtn.disabled = false;
+            generateBtn.classList.remove('pointer-events-none');
         }
     };
 
-    // DOM Rendering functions
-    function renderCover() {
-        bookContent.innerHTML = `
-            <div class="magazine-page flex flex-col justify-center items-center text-center">
-                <p class="text-xs font-sans tracking-[0.4em] uppercase text-gray-400 mb-8 border-b border-gray-300 pb-2">Pollinations AI Exclusive</p>
-                <h1 class="text-7xl md:text-[8rem] font-serif text-ink mb-12 leading-[0.85] tracking-tighter uppercase px-4 hyphens-auto">${globalManuscript.title}</h1>
-                <div class="w-24 h-[1px] bg-ink mb-12"></div>
-                <p class="text-lg md:text-2xl font-sans font-light text-gray-600 max-w-2xl mx-auto leading-loose px-8">${globalManuscript.introduction}</p>
-            </div>
-        `;
+    // ================================================================
+    //  PAGE BUILDERS
+    // ================================================================
+    function buildCoverHTML(title, introduction) {
+        return `
+        <div class="magazine-page flex flex-col justify-center items-center text-center">
+            <p class="text-xs font-sans tracking-[0.4em] uppercase text-gray-400 mb-8 border-b border-gray-300 pb-2">Pollinations AI Exclusive</p>
+            <h1 class="text-7xl md:text-[8rem] font-serif text-ink mb-12 leading-[0.85] tracking-tighter uppercase px-4 break-words hyphens-auto">${escapeHtml(title)}</h1>
+            <div class="w-24 h-[1px] bg-ink mb-12"></div>
+            <p class="text-lg md:text-2xl font-sans font-light text-gray-600 max-w-2xl mx-auto leading-relaxed px-8">${escapeHtml(introduction)}</p>
+        </div>`;
     }
 
-    function renderPage(index) {
-        const page = globalManuscript.pages[index];
-        const imgUrl = globalImageUrls[index];
-        bookContent.innerHTML += `
-            <div class="magazine-page" id="chapter-${index}">
-                <div class="mb-16 relative group">
-                    <p class="text-xs font-sans tracking-[0.3em] uppercase text-gray-400 mb-4 border-b border-gray-200 pb-4 flex justify-between">
-                        <span>Section 0${index + 1} &mdash; ${globalManuscript.title}</span>
-                        <button onclick="regenerateChapter(${index})" class="no-print text-ink hover:text-blue-600 transition underline tracking-widest cursor-pointer opacity-0 group-hover:opacity-100">[ Regenerate Section ]</button>
-                    </p>
-                    <h2 class="text-5xl md:text-7xl font-serif text-ink mb-12 tracking-tight leading-none">${page.page_title}</h2>
-                    <img src="${imgUrl}" alt="Editorial" class="w-full h-[60vh] object-cover bg-gray-100 grayscale-[15%] contrast-110 shadow-sm">
-                </div>
-                <div class="formatted-content">${page.content}</div>
+    function buildPageHTML(i, page, imgUrl, bookTitle) {
+        return `
+        <div class="magazine-page" id="page-block-${i}">
+            <div class="mb-4 flex items-center justify-between">
+                <p class="text-xs font-sans tracking-[0.3em] uppercase text-gray-400 border-b border-gray-200 pb-4 flex-1">
+                    Section 0${i + 1} &mdash; ${escapeHtml(bookTitle)}
+                </p>
+                <button class="regen-btn no-print" onclick="handleRegenPage(${i})" id="regen-btn-${i}">
+                    ↺ Regenerate Section
+                </button>
             </div>
-        `;
+            <h2 class="text-5xl md:text-7xl font-serif text-ink mb-12 tracking-tight leading-none">${escapeHtml(page.page_title)}</h2>
+            <img id="page-img-${i}" src="${imgUrl}" alt="Editorial" class="w-full h-[60vh] object-cover bg-gray-100 grayscale-[15%] contrast-110 shadow-sm mb-10">
+            <div class="formatted-content" id="page-content-${i}">
+                ${page.content}
+            </div>
+        </div>`;
     }
 
-    // --- NEW FEATURES ---
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
 
-    // 1. REGENERATE SINGLE CHAPTER
-    window.regenerateChapter = async (index) => {
-        if(currentBalance < 0.0011) return alert("INSUFFICIENT POLLEN FOR REGENERATION.");
-        
-        const chapDiv = document.getElementById(`chapter-${index}`);
-        chapDiv.innerHTML = `<div class="h-[80vh] flex flex-col items-center justify-center text-ink"><p class="pulse-text font-sans tracking-widest uppercase text-sm">Regenerating Section 0${index+1}...</p></div>`;
-        
-        try {
-            const prompt = `Rewrite chapter ${index+1} of "${globalManuscript.title}". Make it better. Keep HTML formatting. Return JSON: {"page_title":"...", "content":"..."}`;
-            const newText = await aiTextCall(prompt);
-            
-            const newVisualPrompt = `Art Director: New FLUX prompt for chapter about "${newText.page_title}". Style: "${currentStyle}". Masterpiece, 8k. Return JSON: {"image_prompt":"..."}`;
-            const newArt = await aiTextCall(newVisualPrompt);
+    // ================================================================
+    //  IMAGE FETCH HELPER
+    // ================================================================
+    async function fetchImageAsBlob(prompt) {
+        const imgRes = await fetch(`https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}?model=flux&width=1280&height=720`, {
+            headers: { 'Authorization': `Bearer ${apiKey}` }
+        });
+        if (!imgRes.ok) throw new Error('Image fetch failed');
+        return URL.createObjectURL(await imgRes.blob());
+    }
 
-            globalManuscript.pages[index] = newText;
-            globalImageUrls[index] = await aiImageCall(newArt.image_prompt);
-            
-            // Re-render entire book to maintain correct structure (DOM replacement)
-            bookContent.innerHTML = '';
-            renderCover();
-            for(let i=0; i<globalManuscript.pages.length; i++) renderPage(i);
+    // ================================================================
+    //  REGENERATE SINGLE PAGE
+    // ================================================================
+    async function handleRegenPage(pageIndex) {
+        if (!currentManuscript) return;
 
-        } catch(err) { alert("Regeneration failed: " + err.message); }
-    };
+        // Pollen guard: ~0.001 for one image
+        if (!checkPollenSufficient(0.002, 'regenerate this section')) return;
 
-    // 2. TRANSLATOR AGENT (Saves Image Pollen!)
-    window.runTranslationAgent = async () => {
-        const target = document.getElementById('target-lang').value;
-        if(!target) return alert("Please enter a target language.");
-        if(currentBalance < 0.0005) return alert("INSUFFICIENT POLLEN FOR TRANSLATION.");
+        const btn = document.getElementById(`regen-btn-${pageIndex}`);
+        const imgEl = document.getElementById(`page-img-${pageIndex}`);
+        const contentEl = document.getElementById(`page-content-${pageIndex}`);
 
-        document.getElementById('post-gen-dock').classList.remove('dock-active');
-        const loader = document.createElement('div');
-        loader.className = "fixed top-0 left-0 w-full h-full bg-ink/90 z-[200] flex flex-col items-center justify-center text-white no-print";
-        loader.innerHTML = `<p class="pulse-text tracking-[0.3em] font-sans uppercase text-sm">Translating to ${target}...</p><p class="text-xs text-white/40 mt-4">(Preserving images to save pollen)</p>`;
-        document.body.appendChild(loader);
+        btn.disabled = true;
+        btn.innerText = '↺ Regenerating…';
 
         try {
-            const tPrompt = `Translate this entire JSON into ${target}. KEEP THE EXACT SAME JSON STRUCTURE AND HTML TAGS. Do NOT translate HTML tags like <p> or <h3>. 
-            JSON: ${JSON.stringify(globalManuscript)}`;
-            
-            globalManuscript = await aiTextCall(tPrompt, 0.3); // Low temp for accurate translation
-            
-            bookContent.innerHTML = '';
-            renderCover();
-            for(let i=0; i<globalManuscript.pages.length; i++) renderPage(i);
-            
-        } catch(err) { alert("Translation failed."); }
-        
-        loader.remove();
-        document.getElementById('post-gen-dock').classList.add('dock-active');
-    };
+            const page = currentManuscript.pages[pageIndex];
+            const style = document.getElementById('style').value.trim();
+            const topic = document.getElementById('topic').value.trim();
 
-    // 3. CRITIQUE AGENT (Split Screen)
-    window.runReviewAgent = async () => {
-        if(currentBalance < 0.0003) return alert("INSUFFICIENT POLLEN FOR CRITIQUE.");
-        
-        document.body.classList.add('split-active');
-        const reviewBox = document.getElementById('review-content');
-        reviewBox.innerHTML = `<p class="pulse-text text-center text-xs tracking-widest uppercase mt-20">Analyzing semantics and editorial flow...</p>`;
+            // Re-generate image prompt for this page only
+            const reArtPrompt = `You are an Elite Art Director. Design a single photography prompt for AI image generation (FLUX) for this chapter.
+Page Title: "${page.page_title}"
+Content: ${page.content.replace(/<[^>]*>/g, '').slice(0, 400)}
+Visual Style: "${style}"
+End the prompt with: "masterpiece, 8k resolution, highly detailed, high-end editorial photography"
+CRITICAL: NO TEXT, NO LETTERS in the image.
+Return ONLY one raw string (no JSON wrapper).`;
 
-        try {
-            const prompt = `Act as an Elite Vogue Editor-in-Chief. Critique this manuscript. Be harsh but constructive.
-            Manuscript: ${JSON.stringify(globalManuscript)}
-            Return JSON: { "rating": "X/10", "summary": "...", "dos": ["...","..."], "donts": ["...","..."] }`;
-            
-            const critique = await aiTextCall(prompt, 0.6);
-            
-            reviewBox.innerHTML = `
-                <div class="mb-8 border-b border-white/10 pb-8">
-                    <p class="text-[0.65rem] tracking-[0.3em] uppercase text-white/50 mb-2">Editorial Rating</p>
-                    <p class="text-6xl font-serif text-white">${critique.rating}</p>
-                </div>
-                <div class="mb-8">
-                    <p class="text-[0.65rem] tracking-[0.3em] uppercase text-white/50 mb-3">Executive Summary</p>
-                    <p class="text-sm italic font-serif leading-relaxed text-white/80">${critique.summary}</p>
-                </div>
-                <div class="mb-8">
-                    <p class="text-[0.65rem] tracking-[0.3em] uppercase text-green-400 mb-3">What Worked (Dos)</p>
-                    <ul class="list-disc pl-4 space-y-2 text-xs text-white/70 tracking-wide">${critique.dos.map(d => `<li>${d}</li>`).join('')}</ul>
-                </div>
-                <div>
-                    <p class="text-[0.65rem] tracking-[0.3em] uppercase text-red-400 mb-3">What Failed (Don'ts)</p>
-                    <ul class="list-disc pl-4 space-y-2 text-xs text-white/70 tracking-wide">${critique.donts.map(d => `<li>${d}</li>`).join('')}</ul>
-                </div>
-            `;
-        } catch(err) {
-            reviewBox.innerHTML = `<p class="text-red-500 text-xs tracking-widest uppercase">Agent Failed: ${err.message}</p>`;
+            const reArtRes = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'openai',
+                    messages: [{ role: 'user', content: reArtPrompt }],
+                    temperature: 0.7
+                })
+            });
+            if (!reArtRes.ok) throw new Error('Art re-direction failed');
+            const reArtData = await reArtRes.json();
+            const newPrompt = reArtData.choices[0].message.content.trim();
+
+            // Regenerate text content for this page
+            const customInstructions = document.getElementById('custom-instructions').value.trim();
+            const reTextPrompt = `You are a visionary magazine Editor-in-Chief. Rewrite ONLY the content section for one magazine page.
+Page Title: "${page.page_title}"
+Topic: "${topic}"
+Style: "${style}"
+${customInstructions ? 'Custom instructions: ' + customInstructions : ''}
+Return ONLY the HTML content (use <p>, <h3>, <ul> tags). Do not return JSON or any wrapper — just the raw HTML string.`;
+
+            const reTextRes = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'openai',
+                    messages: [{ role: 'user', content: reTextPrompt }],
+                    temperature: 0.6
+                })
+            });
+            if (!reTextRes.ok) throw new Error('Text regeneration failed');
+            const reTextData = await reTextRes.json();
+            const newContent = reTextData.choices[0].message.content.trim();
+
+            // Update state
+            currentManuscript.pages[pageIndex].content = newContent;
+            contentEl.innerHTML = newContent;
+
+            // Regenerate image
+            imgEl.style.opacity = '0.3';
+            const newImgUrl = await fetchImageAsBlob(newPrompt);
+            currentImageUrls[pageIndex] = newImgUrl;
+            imgEl.src = newImgUrl;
+            imgEl.style.opacity = '1';
+
+            btn.innerText = '✓ Regenerated';
+            setTimeout(() => { btn.innerText = '↺ Regenerate Section'; btn.disabled = false; }, 3000);
+
+            setTimeout(fetchAccountData, 2000);
+        } catch (err) {
+            console.error(err);
+            btn.innerText = `✕ Failed: ${err.message}`;
+            setTimeout(() => { btn.innerText = '↺ Regenerate Section'; btn.disabled = false; }, 4000);
         }
-    };
+    }
+
+    // ================================================================
+    //  TRANSLATE
+    // ================================================================
+    async function handleTranslate() {
+        const lang = document.getElementById('translate-lang').value.trim();
+        if (!lang) { alert('Please enter a target language.'); return; }
+        if (!currentManuscript) { alert('Generate a book first.'); return; }
+
+        // Pollen guard: text-only, ~0.0003 per call
+        if (!checkPollenSufficient(0.001, 'translate this book')) return;
+
+        const btn = document.getElementById('translate-btn');
+        btn.disabled = true;
+        btn.innerText = 'Translating…';
+
+        try {
+            // Build minimal JSON for translation (no images)
+            const translatePayload = {
+                title: currentManuscript.title,
+                introduction: currentManuscript.introduction,
+                pages: currentManuscript.pages.map(p => ({
+                    page_title: p.page_title,
+                    content: p.content
+                }))
+            };
+
+            const translatePrompt = `You are a master literary translator. Translate the following JSON book structure to "${lang}".
+- Translate ALL text fields: title, introduction, page_title, and the HTML content inside each "content".
+- Preserve ALL HTML tags exactly as-is (do not translate or remove tags).
+- Return ONLY a valid JSON object with the EXACT same structure.
+
+JSON TO TRANSLATE:
+${JSON.stringify(translatePayload, null, 2)}`;
+
+            const transRes = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'openai',
+                    messages: [{ role: 'user', content: translatePrompt }],
+                    response_format: { type: 'json_object' },
+                    temperature: 0.2
+                })
+            });
+            if (!transRes.ok) throw new Error('Translation API failed');
+            const transData = await transRes.json();
+            const translated = parseAIJson(transData.choices[0].message.content);
+
+            // Update state with translated text, KEEP existing images
+            currentManuscript.title = translated.title;
+            currentManuscript.introduction = translated.introduction;
+            for (let i = 0; i < translated.pages.length; i++) {
+                if (currentManuscript.pages[i] && translated.pages[i]) {
+                    currentManuscript.pages[i].page_title = translated.pages[i].page_title;
+                    currentManuscript.pages[i].content   = translated.pages[i].content;
+                }
+            }
+
+            // Re-render book content, reusing existing image blobs
+            bookContent.innerHTML = buildCoverHTML(currentManuscript.title, currentManuscript.introduction);
+            for (let i = 0; i < currentManuscript.pages.length; i++) {
+                bookContent.innerHTML += buildPageHTML(i, currentManuscript.pages[i], currentImageUrls[i], currentManuscript.title);
+            }
+
+            btn.innerText = `✓ ${lang}`;
+            setTimeout(() => { btn.innerText = 'Translate'; btn.disabled = false; }, 3000);
+            setTimeout(fetchAccountData, 2000);
+
+        } catch (err) {
+            console.error(err);
+            btn.innerText = '✕ Failed';
+            setTimeout(() => { btn.innerText = 'Translate'; btn.disabled = false; }, 4000);
+        }
+    }
+
+    // ================================================================
+    //  CRITIQUE — Vogue Editor-in-Chief Split Screen
+    // ================================================================
+    async function handleCritique() {
+        if (!currentManuscript) { alert('Generate a book first.'); return; }
+
+        // Pollen guard
+        if (!checkPollenSufficient(0.001, 'run the critique')) return;
+
+        if (critiqueOpen) {
+            closeCritique();
+            return;
+        }
+
+        const critiqueBtn = document.getElementById('critique-btn');
+        critiqueBtn.disabled = true;
+        critiqueBtn.innerText = 'Consulting…';
+
+        // Open split layout
+        openCritiquePanel();
+
+        const critLoading = document.getElementById('critique-loading');
+        const critContent = document.getElementById('critique-content');
+        critLoading.classList.remove('hidden');
+        critContent.classList.add('hidden');
+
+        try {
+            const critiquePrompt = `You are the Editor-in-Chief of Vogue Magazine — the most powerful, demanding, and visionary creative mind in publishing.
+You have just read an editorial book with this title: "${currentManuscript.title}"
+Introduction: "${currentManuscript.introduction}"
+Pages: ${JSON.stringify(currentManuscript.pages.map(p => ({ title: p.page_title, content: p.content.replace(/<[^>]*>/g, '').slice(0, 500) })))}
+
+Critique this ruthlessly but eloquently. Give your verdict.
+
+Return ONLY a valid JSON object:
+{
+  "score": 7,
+  "summary": "A one-paragraph editor's letter, as would appear in Vogue.",
+  "dos": ["Strength 1", "Strength 2", "Strength 3"],
+  "donts": ["Weakness 1", "Weakness 2", "Weakness 3"]
+}`;
+
+            const critRes = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'openai',
+                    messages: [{ role: 'user', content: critiquePrompt }],
+                    response_format: { type: 'json_object' },
+                    temperature: 0.7
+                })
+            });
+            if (!critRes.ok) throw new Error('Critique API failed');
+            const critData = await critRes.json();
+            const critique = parseAIJson(critData.choices[0].message.content);
+
+            // Render
+            const scoreRing = document.getElementById('score-ring');
+            const scoreDisplay = document.getElementById('score-display');
+            const score = Math.max(0, Math.min(10, parseInt(critique.score) || 0));
+            scoreRing.style.setProperty('--score', score);
+            scoreDisplay.innerText = score;
+
+            document.getElementById('critique-summary').innerText = critique.summary || '';
+
+            const dosList  = document.getElementById('critique-dos');
+            const dontsList = document.getElementById('critique-donts');
+            dosList.innerHTML = '';
+            dontsList.innerHTML = '';
+
+            (critique.dos || []).forEach(d => {
+                const li = document.createElement('li');
+                li.className = 'text-xs font-sans font-light text-white/70 leading-relaxed pl-3 border-l border-emerald-500/40';
+                li.innerText = d;
+                dosList.appendChild(li);
+            });
+            (critique.donts || []).forEach(d => {
+                const li = document.createElement('li');
+                li.className = 'text-xs font-sans font-light text-white/70 leading-relaxed pl-3 border-l border-red-500/40';
+                li.innerText = d;
+                dontsList.appendChild(li);
+            });
+
+            critLoading.classList.add('hidden');
+            critContent.classList.remove('hidden');
+
+            critiqueBtn.innerText = '✕ Close Critique';
+            setTimeout(fetchAccountData, 2000);
+
+        } catch (err) {
+            console.error(err);
+            closeCritique();
+            showPollenError(`Critique failed: ${err.message}`);
+            critiqueBtn.innerText = '✦ Critique';
+        } finally {
+            critiqueBtn.disabled = false;
+        }
+    }
+
+    function openCritiquePanel() {
+        critiqueOpen = true;
+        document.getElementById('critique-panel').classList.add('open');
+        document.getElementById('book-outer').classList.add('split');
+        document.getElementById('critique-btn').classList.add('toggled');
+    }
+
+    function closeCritique(silent = false) {
+        critiqueOpen = false;
+        document.getElementById('critique-panel').classList.remove('open');
+        document.getElementById('book-outer').classList.remove('split');
+        const btn = document.getElementById('critique-btn');
+        if (btn) {
+            btn.classList.remove('toggled');
+            if (!silent) btn.innerText = '✦ Critique';
+        }
+    }
     </script>
 </body>
 </html>
