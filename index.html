@@ -1122,10 +1122,8 @@
                     const batch = chunks.slice(i, i + batchSize);
 
                     const batchPromises = batch.map(chunk => {
-                        const url = `https://text.pollinations.ai/${encodeURIComponent(chunk)}?voice=${voice}&model=elevenlabs`;
-                        return fetch(url, {
-                            headers: { 'Authorization': `Bearer ${apiKey}` }
-                        }).then(res => {
+                        const url = `https://gen.pollinations.ai/audio/${encodeURIComponent(chunk)}?voice=${voice}&key=${apiKey}`;
+                        return fetch(url).then(res => {
                             if (res.status === 402) throw new Error("Out of pollen limit");
                             if (!res.ok) throw new Error(`TTS operation failed: ${res.status}`);
                             return res.blob();
