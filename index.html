@@ -1,59 +1,1162 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Editorial Studio | Powered by Pollinations</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
+
+    <!-- Ultra-Premium Typography: Cormorant (Serif) & Montserrat (Sans) -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500&display=swap"
+        rel="stylesheet">
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Montserrat', 'sans-serif'], serif: ['Cormorant Garamond', 'serif'] },
-                    colors: { cream: '#F9F9F6', ink: '#0A0A0A' }
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                        serif: ['Cormorant Garamond', 'serif'],
+                    },
+                    colors: {
+                        cream: '#F9F9F6',
+                        ink: '#0A0A0A',
+                    }
                 }
             }
         }
     </script>
+
     <style>
-        html { scroll-behavior: smooth; }
-        body { background-color: #050505; color: #ffffff; overflow-x: hidden; }
-        .video-bg { position: fixed; right: 0; bottom: 0; min-width: 100%; min-height: 100%; width: auto; height: auto; z-index: -2; object-fit: cover; opacity: 0.5; filter: grayscale(30%) contrast(120%); }
-        .video-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; background: linear-gradient(180deg, rgba(5, 5, 5, 0.4) 0%, rgba(5, 5, 5, 0.95) 100%); }
-        .luxury-input { background: transparent; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; width: 100%; padding: 0.5rem 0; transition: all 0.4s ease; border-radius: 0; }
-        .luxury-input:focus { outline: none; border-bottom: 1px solid rgba(255, 255, 255, 1); background: transparent; }
-        .luxury-input::placeholder { color: rgba(255, 255, 255, 0.15); }
-        .magazine-wrapper { background: #F9F9F6; color: #0A0A0A; }
-        .magazine-page { page-break-after: always; padding: 6rem 4rem; max-width: 1200px; margin: 0 auto; min-height: 100vh; }
-        .formatted-content { column-count: 2; column-gap: 4rem; text-align: justify; }
-        .formatted-content p { font-family: 'Montserrat', sans-serif; font-size: 0.95rem; line-height: 2; margin-bottom: 1.5rem; font-weight: 300; color: #222; }
-        .formatted-content>p:first-of-type::first-letter { float: left; font-size: 6.5rem; line-height: 0.7; padding-top: 8px; padding-right: 12px; font-family: 'Cormorant Garamond', serif; font-weight: 400; color: #0A0A0A; }
-        .formatted-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 400; color: #000; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid #ddd; padding-bottom: 0.5rem; column-span: all; }
-        .formatted-content ul, .formatted-content ol { font-family: 'Montserrat', sans-serif; margin-left: 1rem; margin-bottom: 2rem; color: #333; font-size: 0.95rem; line-height: 2; font-weight: 300; }
-        .formatted-content li { margin-bottom: 0.5rem; }
-        .formatted-content strong { font-weight: 500; color: #000; }
-        #workspace-container { display: flex; width: 100%; transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
-        #book-container { transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
-        #critique-panel { transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
-        /* Modals and audio controls smooth animations */
-        #costs-panel, #cover-panel, #audio-controls { transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #050505; }
-        ::-webkit-scrollbar-thumb { background: #333; }
-        @media print {
-            .no-print, .video-bg, .video-overlay, #critique-panel { display: none !important; }
-            body, .magazine-wrapper { background: white !important; color: black !important; }
-            .magazine-page { padding: 0; max-width: 100%; margin: 0; }
-            .formatted-content { column-count: 2; column-gap: 3rem; }
-            #book-container { width: 100% !important; }
+        /* Base Resets & Smoothness */
+        html {
+            scroll-behavior: smooth;
         }
-        .pulse-text { animation: pulseOpacity 2s infinite; }
-        @keyframes pulseOpacity { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* The $200k Video Background Technique */
+        .video-bg {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -2;
+            object-fit: cover;
+            opacity: 0.5;
+            filter: grayscale(30%) contrast(120%);
+        }
+
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: linear-gradient(180deg, rgba(5, 5, 5, 0.4) 0%, rgba(5, 5, 5, 0.95) 100%);
+        }
+
+        /* Swiss Luxury Inputs */
+        .luxury-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            width: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.4s ease;
+            border-radius: 0;
+        }
+
+        .luxury-input:focus {
+            outline: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 1);
+            background: transparent;
+        }
+
+        .luxury-input::placeholder {
+            color: rgba(255, 255, 255, 0.15);
+        }
+
+        /* The Output: Print Magazine Styling */
+        .magazine-wrapper {
+            background: #F9F9F6;
+            color: #0A0A0A;
+        }
+
+        .magazine-page {
+            page-break-after: always;
+            padding: 6rem 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        .formatted-content {
+            column-count: 2;
+            column-gap: 4rem;
+            text-align: justify;
+        }
+
+        .formatted-content p {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95rem;
+            line-height: 2;
+            margin-bottom: 1.5rem;
+            font-weight: 300;
+            color: #222;
+        }
+
+        /* Massive Drop Cap for the first paragraph */
+        .formatted-content>p:first-of-type::first-letter {
+            float: left;
+            font-size: 6.5rem;
+            line-height: 0.7;
+            padding-top: 8px;
+            padding-right: 12px;
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 400;
+            color: #0A0A0A;
+        }
+
+        .formatted-content h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 400;
+            color: #000;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 0.5rem;
+            column-span: all;
+        }
+
+        .formatted-content ul,
+        .formatted-content ol {
+            font-family: 'Montserrat', sans-serif;
+            margin-left: 1rem;
+            margin-bottom: 2rem;
+            color: #333;
+            font-size: 0.95rem;
+            line-height: 2;
+            font-weight: 300;
+        }
+
+        .formatted-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .formatted-content strong {
+            font-weight: 500;
+            color: #000;
+        }
+
+        /* Split Screen Animation */
+        #workspace-container {
+            display: flex;
+            width: 100%;
+            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #book-container {
+            transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #critique-panel {
+            transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Custom minimal scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+        }
+
+        @media print {
+
+            .no-print,
+            .video-bg,
+            .video-overlay,
+            #critique-panel {
+                display: none !important;
+            }
+
+            body,
+            .magazine-wrapper {
+                background: white !important;
+                color: black !important;
+            }
+
+            .magazine-page {
+                padding: 0;
+                max-width: 100%;
+                margin: 0;
+            }
+
+            .formatted-content {
+                column-count: 2;
+                column-gap: 3rem;
+            }
+
+            #book-container {
+                width: 100% !important;
+            }
+        }
+
+        /* Glitch/Pulse animation for loading states */
+        .pulse-text {
+            animation: pulseOpacity 2s infinite;
+        }
+
+        @keyframes pulseOpacity {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
     </style>
 </head>
+
 <body class="antialiased min-h-screen relative selection:bg-white selection:text-black">
+
+    <!-- Cinematic Video Background (Abstract Dark Fluid) -->
     <video autoplay loop muted playsinline class="video-bg no-print">
         <source src="https://cdn.coverr.co/videos/coverr-dark-abstract-waves-2641/1080p.mp4" type="video/mp4">
     </video>
     <div class="video-overlay no-print"></div>
+
+    <!-- Terms of Service Modal -->
+    <div id="tos-modal"
+        class="hidden fixed inset-0 z-[100] bg-black/90 flex justify-center items-center backdrop-blur-sm p-4">
+        <div class="bg-ink border border-white/20 max-w-2xl w-full p-12 relative max-h-[90vh] overflow-y-auto">
+            <button id="close-tos"
+                class="absolute top-6 right-6 text-white text-3xl hover:text-white/60 transition-colors">&times;</button>
+            <h2 class="text-3xl font-serif mb-6 uppercase tracking-widest text-center text-white">Terms of Service &
+                Usage Guidance</h2>
+            <div class="font-sans text-sm font-light leading-loose text-white/80 space-y-6">
+                <p>Welcome to the AI Editorial Studio. By utilizing this platform, you interact with parameters of
+                    luxury editorial generation, powered seamlessly by Pollinations AI.</p>
+
+                <h3 class="text-lg text-white tracking-widest border-b border-white/20 pb-2 uppercase">Platform
+                    Mechanics</h3>
+                <p>Every generation, translation, critique, and targeted regeneration consumes <em>Pollen</em>. This
+                    abstract currency ensures the ecosystem operates at peak performance.</p>
+
+                <h3 class="text-lg text-white tracking-widest border-b border-white/20 pb-2 uppercase">Tier Guidance
+                </h3>
+                <div class="p-6 bg-white/5 border border-white/10">
+                    <p class="mb-2 uppercase tracking-widest text-white"><strong
+                            class="font-semibold text-green-400">RECOMMENDED: SEED Tier</strong></p>
+                    <p class="mb-6">We highly recommend upgrading to the SEED tier for the ultimate experience. This
+                        provides full access to premium features, high-fidelity synthesis, and an unrestricted creative
+                        canvas.</p>
+                    <p class="mb-2 uppercase tracking-widest text-white"><strong
+                            class="font-semibold text-gray-400">SPORE Tier</strong></p>
+                    <p>The SPORE tier is heavily limited. It serves only as a basic introduction; usage is restricted
+                        and you may frequently encounter pollen exhaustion.</p>
+                </div>
+
+                <h3 class="text-lg text-white tracking-widest border-b border-white/20 pb-2 uppercase">AI-Generated
+                    Content</h3>
+                <p>The content synthesized by our dual-agent pipeline is algorithmic. While we strive for high-end
+                    fidelity, variations, hallucinations, and abstract interpretations represent the inherent nature of
+                    generative art.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Toast Container -->
+    <div id="toast-container" class="fixed top-8 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2"></div>
+
+    <!-- Transparent, Ultra-Minimal Nav -->
+    <nav
+        class="w-full flex flex-col md:flex-row justify-between items-center p-8 md:px-16 no-print z-50 fixed top-0 left-0 mix-blend-difference gap-4">
+        <div class="flex flex-col items-center md:items-start">
+            <h1 class="text-sm font-sans tracking-[0.3em] uppercase text-white font-light flex items-center gap-3">
+                <img src="https://raw.githubusercontent.com/pollinations/pollinations/main/assets/logo.svg"
+                    alt="Pollinations Logo" class="w-6 h-6 invert">
+                E-Book Studio
+            </h1>
+            <p class="text-[0.6rem] font-sans tracking-[0.2em] uppercase text-white/50 mt-1">Engine Powered by
+                Pollinations AI</p>
+            <button id="open-tos"
+                class="mt-2 text-[0.6rem] tracking-[0.2em] uppercase text-white/50 border-b border-white/20 hover:text-white transition-colors">Terms
+                of Service</button>
+        </div>
+
+        <a id="auth-btn"
+            class="text-xs font-sans tracking-[0.2em] uppercase text-white border-b border-white/30 pb-1 hover:border-white transition-all cursor-pointer hidden">
+            Authenticate Node
+        </a>
+
+        <div id="user-status" class="hidden flex items-center space-x-6">
+            <span id="tier-badge"
+                class="text-[0.6rem] font-sans tracking-[0.3em] uppercase text-white border border-white/20 px-3 py-1 bg-white/10">SPORE</span>
+            <span class="text-xs font-sans tracking-[0.2em] uppercase text-white">
+                POLLEN: <span id="pollen-balance" class="font-medium text-white shadow-sm">...</span>
+            </span>
+        </div>
+    </nav>
+
+    <!-- Main Studio Interface -->
+    <main class="relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-6 pt-32 pb-20 no-print"
+        id="main-view">
+
+        <!-- Auth Warning State -->
+        <div id="auth-warning" class="text-center mb-16 hidden">
+            <h2 class="text-4xl md:text-6xl font-serif text-white mb-6 tracking-tight">Access Restricted</h2>
+            <p
+                class="text-xs font-sans tracking-[0.2em] uppercase text-white/60 max-w-lg mx-auto leading-loose border border-white/10 p-6 backdrop-blur-sm">
+                Authentication required. Connect your Pollinations node to utilize the multi-modal generation engine at
+                zero platform cost.
+            </p>
+            <div class="mt-8 flex flex-col items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" id="tos-agree"
+                        class="w-4 h-4 accent-white bg-transparent border border-white/30 rounded-none cursor-pointer">
+                    <label for="tos-agree"
+                        class="text-[0.6rem] font-sans tracking-[0.2em] uppercase text-white/60 cursor-pointer">
+                        I AGREE TO THE <a href="#" id="open-tos-initial"
+                            class="text-white border-b border-white/30 hover:border-white transition-colors">TERMS OF
+                            SERVICE</a>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- The Studio Form (Brutalist Luxury) -->
+        <div id="app-wrapper" class="hidden w-full max-w-4xl mx-auto mt-12">
+
+            <div id="limits-dashboard" class="mb-20 flex justify-between items-end border-b border-white/10 pb-4">
+                <p class="text-xs font-sans tracking-[0.2em] uppercase text-white/40">Allocated Bandwidth</p>
+                <p class="text-sm font-sans tracking-[0.2em] text-white"><span id="max-pages-display"
+                        class="font-medium text-lg text-white">0</span> MAX PAGES</p>
+            </div>
+
+            <div class="space-y-16">
+                <!-- Input 1 -->
+                <div class="group">
+                    <label
+                        class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase transition-colors group-focus-within:text-white">01
+                        &mdash; Subject Matter</label>
+                    <input type="text" id="topic" placeholder="e.g. The Architecture of Minimalist Sound"
+                        class="luxury-input">
+                </div>
+
+                <!-- Input 2 -->
+                <div class="group">
+                    <label
+                        class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase transition-colors group-focus-within:text-white">02
+                        &mdash; Art Direction & Tone</label>
+                    <input type="text" id="style" placeholder="e.g. Bauhaus, High-Contrast, Melancholic"
+                        class="luxury-input">
+                </div>
+
+                <!-- Input 3 (Custom Instructions) -->
+                <div class="group">
+                    <label
+                        class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase transition-colors group-focus-within:text-white flex items-center justify-between">
+                        <span>03 &mdash; Custom Instructions</span>
+                        <span
+                            class="text-[0.6rem] tracking-widest text-white/50 border border-white/20 px-2 py-0.5 ml-3 bg-white/5 inline-block">PREMIUM
+                            PARAMETER</span>
+                    </label>
+                    <input type="text" id="custom-instructions"
+                        placeholder="e.g. Speak like a 19th-century poet, extreme minimalism..."
+                        class="luxury-input text-lg">
+                </div>
+
+                <!-- Input 4 -->
+                <div class="group">
+                    <label
+                        class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase transition-colors group-focus-within:text-white">04
+                        &mdash; Page Count</label>
+                    <input type="number" id="pages-count" value="4" min="1" class="luxury-input w-32">
+                    <p id="page-warning"
+                        class="text-[0.65rem] font-sans tracking-widest text-red-500 mt-4 hidden uppercase">Insufficient
+                        Pollen Balance for this request</p>
+                </div>
+            </div>
+
+            <!-- Generate Action -->
+            <div class="mt-24 pt-10 text-center flex flex-col items-center">
+                <button id="generate-btn"
+                    class="text-sm font-sans tracking-[0.3em] uppercase text-ink bg-white border border-white px-16 py-6 hover:bg-transparent hover:text-white transition-all duration-700 w-full md:w-auto shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:shadow-none">
+                    Initialize Dual-Agent Pipeline
+                </button>
+                <div id="status-container" class="mt-12 h-8 hidden">
+                    <p id="status-text" class="text-xs font-sans tracking-[0.2em] uppercase text-white pulse-text"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Rendered Workspace (Split Screen Architecture) -->
+    <div id="workspace-container" class="hidden h-screen bg-cream z-20 relative pt-24 overflow-hidden">
+
+        <!-- Generated Book Area -->
+        <div id="book-container"
+            class="w-full h-full overflow-y-auto bg-cream transition-all duration-700 hidden-scrollbar border-r border-gray-300">
+            <!-- Toolbar -->
+            <div
+                class="text-center py-4 bg-ink no-print sticky top-0 z-30 flex justify-between items-center px-4 md:px-8 border-b border-white/10 shadow-xl flex-wrap gap-4">
+                <div class="flex items-center gap-4">
+                    <button id="back-btn"
+                        class="text-xs font-sans tracking-[0.2em] text-white/50 hover:text-white transition-colors uppercase">&larr;
+                        Back</button>
+                    <p
+                        class="text-[0.65rem] font-sans tracking-[0.3em] uppercase text-white/50 border-l border-white/20 pl-4 hidden md:block">
+                        Rendered via Pollinations AI</p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <!-- Translate System -->
+                    <div class="flex items-center border border-white/20 focus-within:border-white transition-colors">
+                        <input type="text" id="target-language" placeholder="Language"
+                            class="bg-transparent text-[0.65rem] text-white px-3 py-2 outline-none w-20 md:w-24 tracking-widest uppercase placeholder-white/40">
+                        <button id="translate-btn"
+                            class="text-[0.65rem] font-sans tracking-[0.2em] uppercase text-white hover:bg-white hover:text-ink transition-colors px-3 py-2 border-l border-white/20">
+                            Translate
+                        </button>
+                    </div>
+
+                    <button id="tts-btn"
+                        class="text-[0.65rem] font-sans tracking-[0.2em] uppercase text-white hover:bg-white hover:text-ink transition-colors border border-white/20 px-4 py-2 flex items-center gap-2">
+                        <span>AUDIOBOOK</span>
+                    </button>
+
+                    <button id="critique-btn"
+                        class="text-[0.65rem] font-sans tracking-[0.2em] uppercase text-white hover:bg-white hover:text-ink transition-colors border border-white/20 px-4 py-2">
+                        Critique
+                    </button>
+
+                    <button onclick="window.print()"
+                        class="text-[0.65rem] font-sans tracking-[0.2em] uppercase text-white hover:bg-white hover:text-ink transition-colors border border-white/20 px-4 py-2 hidden md:block">
+                        PDF
+                    </button>
+                </div>
+            </div>
+
+            <div class="magazine-wrapper" id="book-content">
+                <!-- AI Content Injected Here -->
+            </div>
+
+            <!-- Enhanced Footer Logo (Branding) -->
+            <div class="text-center py-20 bg-cream border-t border-gray-200">
+                <div class="flex justify-center items-center gap-4 mb-4 text-ink">
+                    <img src="https://raw.githubusercontent.com/pollinations/pollinations/main/assets/logo.svg"
+                        alt="Pollinations Logo" class="w-7 h-7">
+                    <p class="text-lg font-sans tracking-[0.3em] uppercase font-light">Pollinations AI</p>
+                </div>
+                <p class="text-[0.65rem] font-sans tracking-[0.3em] uppercase text-gray-500 mb-4">Concept to Reality</p>
+                <div class="w-16 h-[1px] bg-gray-300 mx-auto mb-4"></div>
+                <p class="text-sm font-serif italic text-gray-700 px-8 max-w-sm mx-auto leading-relaxed">Our profound
+                    gratitude to Pollinations for empowering this generation engine flawlessly.</p>
+            </div>
+        </div>
+
+        <!-- Sidebar Panel for Critique -->
+        <div id="critique-panel"
+            class="w-0 bg-ink flex-shrink-0 h-full overflow-y-auto hidden-scrollbar relative no-print shadow-[-10px_0_30px_rgba(0,0,0,0.5)]">
+            <button id="close-critique"
+                class="absolute top-6 right-8 text-white text-3xl hover:text-white/60 transition-colors">&times;</button>
+            <div class="p-10 w-full md:w-96 max-w-full">
+                <div class="mb-10 border-b border-white/20 pb-6">
+                    <h3 class="text-4xl font-serif text-white tracking-widest leading-tight">Editor-in<br>Chief</h3>
+                    <p class="text-[0.65rem] tracking-[0.4em] text-green-400 uppercase mt-2">Vogue Persona Active</p>
+                </div>
+                <div id="critique-content" class="text-white space-y-8">
+                    <!-- Critique injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Balance validation framework
+        let currentBalance = 0;
+
+        // Abstract application state
+        window.currentManuscript = null;
+        window.currentImages = [];
+        window.currentTopic = "";
+        window.currentStyle = "";
+        window.currentCustom = "";
+
+        const authBtn = document.getElementById('auth-btn');
+        const authWarning = document.getElementById('auth-warning');
+        const appWrapper = document.getElementById('app-wrapper');
+        const userStatus = document.getElementById('user-status');
+        const limitsDashboard = document.getElementById('limits-dashboard');
+        const maxPagesDisplay = document.getElementById('max-pages-display');
+        const pagesInput = document.getElementById('pages-count');
+        const pageWarning = document.getElementById('page-warning');
+        const pollenBalanceEl = document.getElementById('pollen-balance');
+        const tierBadgeEl = document.getElementById('tier-badge');
+
+        // Element selections
+        const toastContainer = document.getElementById('toast-container');
+        const generateBtn = document.getElementById('generate-btn');
+        const statusContainer = document.getElementById('status-container');
+        const statusText = document.getElementById('status-text');
+
+        const mainView = document.getElementById('main-view');
+        const workspaceContainer = document.getElementById('workspace-container');
+        const bookContainer = document.getElementById('book-container');
+        const bookContent = document.getElementById('book-content');
+        const critiquePanel = document.getElementById('critique-panel');
+        const critiqueContent = document.getElementById('critique-content');
+
+        // Feature: Terms of Service Modal
+        document.getElementById('open-tos').onclick = () => document.getElementById('tos-modal').classList.remove('hidden');
+        document.getElementById('close-tos').onclick = () => document.getElementById('tos-modal').classList.add('hidden');
+
+        // Feature: Back to setup
+        document.getElementById('back-btn').onclick = () => {
+            workspaceContainer.classList.add('hidden');
+            mainView.classList.remove('hidden');
+        };
+
+        let maxAllowedPages = 0;
+
+        const urlHash = new URLSearchParams(location.hash.slice(1));
+        let apiKey = urlHash.get('api_key');
+
+        if (window.location.hash) {
+            window.history.replaceState(null, null, location.pathname);
+        }
+
+        // Cost logic map
+        const actionCosts = {
+            'generate_base': 0.0011, // Approximately 1 text generation + 1 flux image
+            'translate': 0.0005,
+            'critique': 0.0002,
+            'regenerate': 0.0002,
+            'audiobook': 0.0001
+        };
+
+        function showGlobalError(msg) {
+            const errDiv = document.createElement('div');
+            errDiv.className = "bg-red-600/90 text-white font-sans text-[0.65rem] tracking-[0.2em] uppercase px-8 py-4 shadow-2xl transition-all duration-500 border border-red-400 backdrop-blur-sm opacity-0 transform translate-y-[-20px]";
+            errDiv.innerHTML = msg;
+            toastContainer.appendChild(errDiv);
+
+            requestAnimationFrame(() => {
+                errDiv.style.opacity = '1';
+                errDiv.style.transform = 'translate-y-0';
+            });
+
+            setTimeout(() => {
+                errDiv.style.opacity = '0';
+                errDiv.style.transform = 'translate-y-[-20px]';
+                setTimeout(() => errDiv.remove(), 500);
+            }, 4000);
+        }
+
+        // Feature 6: Central Validation Check
+        function checkBalance(action, amountMultiplier = 1) {
+            const cost = (actionCosts[action] || 0) * amountMultiplier;
+
+            if (currentBalance < cost) {
+                showGlobalError("Insufficient pollen. Please refill to continue.");
+                return false;
+            }
+            return true;
+        }
+
+        if (apiKey) {
+            authBtn.classList.add('hidden');
+            authWarning.classList.add('hidden');
+            appWrapper.classList.remove('hidden');
+            userStatus.classList.remove('hidden');
+            fetchAccountData();
+        } else {
+            authWarning.classList.remove('hidden');
+            const tosAgree = document.getElementById('tos-agree');
+            const openTosInitial = document.getElementById('open-tos-initial');
+            if (openTosInitial) {
+                openTosInitial.onclick = (e) => {
+                    e.preventDefault();
+                    document.getElementById('tos-modal').classList.remove('hidden');
+                };
+            }
+
+            if (window.location.protocol === 'about:' || window.location.protocol === 'blob:') {
+                authWarning.innerHTML += `
+                <p class="text-xs font-sans tracking-widest uppercase text-red-500 mt-8 border border-red-500/30 p-4 bg-red-500/10">
+                    SYSTEM ERROR: PREVIEW SANDBOX DETECTED.<br>RUN LOCALLY (.html file) OR DEPLOY TO GITHUB PAGES TO PROCEED.
+                </p>
+            `;
+            } else {
+                authBtn.classList.remove('hidden');
+                authBtn.classList.add('opacity-30', 'pointer-events-none'); // default disabled
+
+                const params = new URLSearchParams({
+                    redirect_url: window.location.href.split('#')[0],
+                    permissions: 'profile,balance'
+                });
+                authBtn.href = `https://enter.pollinations.ai/authorize?${params}`;
+                authBtn.target = "_top";
+
+                if (tosAgree) {
+                    tosAgree.addEventListener('change', (e) => {
+                        if (e.target.checked) {
+                            authBtn.classList.remove('opacity-30', 'pointer-events-none');
+                        } else {
+                            authBtn.classList.add('opacity-30', 'pointer-events-none');
+                        }
+                    });
+                }
+            }
+        }
+
+        async function fetchAccountData() {
+            try {
+                const balRes = await fetch('https://gen.pollinations.ai/account/balance', {
+                    headers: { 'Authorization': `Bearer ${apiKey}` }
+                });
+                const balData = await balRes.json();
+
+                const balance = balData.balance !== undefined ? parseFloat(balData.balance) : parseFloat(balData);
+                currentBalance = isNaN(balance) ? 0 : balance;
+                pollenBalanceEl.innerText = currentBalance.toFixed(3);
+
+                maxAllowedPages = Math.floor(currentBalance / actionCosts.generate_base);
+                maxPagesDisplay.innerText = maxAllowedPages;
+                pagesInput.max = maxAllowedPages;
+
+                const profRes = await fetch('https://gen.pollinations.ai/account/profile', {
+                    headers: { 'Authorization': `Bearer ${apiKey}` }
+                });
+                if (profRes.ok) {
+                    const profData = await profRes.json();
+                    if (profData.tier) {
+                        tierBadgeEl.innerText = profData.tier.toUpperCase();
+                    }
+                }
+
+                pagesInput.addEventListener('input', (e) => {
+                    const requestedPages = parseInt(e.target.value);
+                    if (requestedPages > maxAllowedPages) {
+                        pageWarning.classList.remove('hidden');
+                        generateBtn.disabled = true;
+                        generateBtn.classList.add('opacity-30', 'pointer-events-none');
+                    } else {
+                        pageWarning.classList.add('hidden');
+                        generateBtn.disabled = false;
+                        generateBtn.classList.remove('opacity-30', 'pointer-events-none');
+                    }
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function parseAIJson(rawStr) {
+            try {
+                let cleaned = rawStr.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, '').trim();
+                const firstBrace = cleaned.indexOf('{');
+                const lastBrace = cleaned.lastIndexOf('}');
+                if (firstBrace !== -1 && lastBrace !== -1) {
+                    cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+                }
+                return JSON.parse(cleaned);
+            } catch (err) {
+                console.error("Failed parsing AI JSON: ", rawStr);
+                throw new Error("Invalid format received from Generator");
+            }
+        }
+
+        // Core Rendering Function
+        function renderBookView() {
+            if (!window.currentManuscript) return;
+
+            let html = `
+            <div class="magazine-page flex flex-col justify-center items-center text-center px-4">
+                <p class="text-[0.65rem] font-sans tracking-[0.4em] uppercase text-gray-500 mb-8 border-b border-gray-300 pb-2 font-semibold">Pollinations AI Exclusive</p>
+                <h1 class="text-6xl md:text-[8rem] font-serif text-ink mb-12 leading-[0.85] tracking-tighter uppercase px-4 break-words hyphens-auto w-full">${window.currentManuscript.title}</h1>
+                <div class="w-24 h-[1px] bg-ink mb-12"></div>
+                <p class="text-lg md:text-2xl font-sans font-light text-gray-600 max-w-2xl mx-auto leading-relaxed px-4 md:px-8">${window.currentManuscript.introduction}</p>
+            </div>
+        `;
+
+            for (let i = 0; i < window.currentManuscript.pages.length; i++) {
+                const page = window.currentManuscript.pages[i];
+                const imgUrl = window.currentImages[i] || 'https://via.placeholder.com/1280x720';
+
+                html += `
+                <div class="magazine-page relative transition-opacity duration-500" id="page-wrapper-${i}">
+                    <div class="mb-16">
+                        <p class="text-[0.6rem] md:text-xs font-sans tracking-[0.3em] uppercase text-gray-400 mb-4 border-b border-gray-200 pb-4 flex justify-between">
+                            <span>Section 0${i + 1} &mdash; ${window.currentManuscript.title}</span>
+                        </p>
+                        <h2 id="page-title-${i}" class="text-4xl md:text-6xl lg:text-7xl font-serif text-ink mb-12 tracking-tight leading-none break-words">${page.page_title}</h2>
+                        <img src="${imgUrl}" alt="Editorial Concept" class="w-full h-[50vh] md:h-[60vh] object-cover bg-gray-100 grayscale-[15%] contrast-[1.15] shadow-sm transition-all hover:grayscale-0">
+                    </div>
+                    <div id="page-content-${i}" class="formatted-content px-4 md:px-0">
+                        ${page.content}
+                    </div>
+                    
+                    <!-- Feature 3: Per-Page Regeneration Button -->
+                    <div class="mt-16 pt-10 border-t border-gray-200 text-center no-print">
+                        <button onclick="regeneratePage(${i})" class="text-[0.65rem] font-sans tracking-[0.2em] uppercase text-ink/70 border border-ink/20 px-8 py-3 hover:bg-ink hover:text-white transition-all transform hover:-translate-y-0.5" id="regen-btn-${i}">
+                            Regenerate Section
+                        </button>
+                    </div>
+                </div>
+            `;
+            }
+
+            bookContent.innerHTML = html;
+            bookContainer.scrollTop = 0;
+        }
+
+        generateBtn.onclick = async () => {
+            const topic = document.getElementById('topic').value;
+            const style = document.getElementById('style').value;
+            const customInstr = document.getElementById('custom-instructions').value;
+            const pagesCount = parseInt(document.getElementById('pages-count').value);
+
+            if (!topic || !style) {
+                showGlobalError("Subject Matter and Art Direction are required.");
+                return;
+            }
+
+            if (!checkBalance('generate_base', pagesCount)) return;
+
+            try {
+                generateBtn.disabled = true;
+                generateBtn.innerText = "PIPELINE ACTIVE";
+                generateBtn.classList.add('bg-transparent', 'text-white', 'pointer-events-none');
+
+                statusContainer.classList.remove('hidden');
+
+                window.currentTopic = topic;
+                window.currentStyle = style;
+                window.currentCustom = customInstr; // Store for per-page regeneration Feature 4
+
+                // Feature 4 Integration: Inject custom instructions directly into generation prompt
+                const instructionsInjection = customInstr ? `\n\nCRITICAL PARAMETER (CUSTOM INSTRUCTIONS): ${customInstr}\nYou MUST respect these instructions exactly.` : '';
+
+                statusText.innerText = "[ AGENT 01 ] ARCHITECTING MANUSCRIPT & EDITORIAL COPY...";
+
+                const authorPrompt = `You are a visionary Editor-in-Chief for a high-end magazine.
+            Write a profound, highly sophisticated editorial piece about "${topic}".
+            It must be exactly ${pagesCount} pages long.${instructionsInjection}
+
+            FORMATTING RULES:
+            1. Write high-value, insightful, and beautifully paced paragraphs.
+            2. Format the "content" field in HTML: Use <p> for paragraphs, <h3> for sub-headers, and <ul> for lists. No markdown wrapping.
+            
+            Return ONLY a valid JSON object:
+            {
+                "title": "A profound, elegant title",
+                "introduction": "A sophisticated preamble/hook.",
+                "pages":[
+                    {
+                        "page_title": "Chapter Heading",
+                        "content": "<p>Content...</p>"
+                    }
+                ]
+            }`;
+
+                const authorRes = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'openai',
+                        messages: [{ role: 'user', content: authorPrompt }],
+                        response_format: { type: "json_object" },
+                        temperature: 0.5
+                    })
+                });
+
+                if (!authorRes.ok) throw new Error("AGENT 01 FAILED");
+                const authorData = await authorRes.json();
+                const manuscript = parseAIJson(authorData.choices[0].message.content);
+                window.currentManuscript = manuscript;
+
+                statusText.innerText = "[ AGENT 02 ] ANALYZING TEXT & DIRECTING VISUAL CONCEPTS...";
+
+                const artDirectorPrompt = `You are an Elite Art Director & Photography Expert.
+            I will give you a ${pagesCount}-page manuscript. 
+            For EACH page, read the title and content, and design a breathtaking, award-winning photography prompt for an AI image generator (FLUX).
+            The global visual aesthetic must be: "${style}".
+
+            RULES FOR IMAGE PROMPTS:
+            1. Describe the subject, the lighting (e.g., volumetric, cinematic, chiaroscuro), the camera lens, and the exact environment.
+            2. End every prompt with: "masterpiece, 8k resolution, highly detailed, high-end editorial photography".
+            3. CRITICAL: NO TEXT, NO LETTERS, NO TYPOGRAPHY IN THE IMAGE. 
+
+            MANUSCRIPT:
+            ${JSON.stringify(manuscript.pages)}
+
+            Return ONLY a valid JSON object containing exactly ${pagesCount} strings:
+            {
+                "image_prompts": [
+                    "Prompt for page 1...",
+                    "Prompt for page 2..."
+                ]
+            }`;
+
+                const artRes = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'openai',
+                        messages: [{ role: 'user', content: artDirectorPrompt }],
+                        response_format: { type: "json_object" },
+                        temperature: 0.7
+                    })
+                });
+
+                if (!artRes.ok) throw new Error("AGENT 02 FAILED");
+                const artData = await artRes.json();
+                const artDirection = parseAIJson(artData.choices[0].message.content);
+                window.currentImages = [];
+
+                for (let i = 0; i < manuscript.pages.length; i++) {
+                    const visualConcept = artDirection.image_prompts[i] || `${topic}, ${style}, masterpiece, 8k`;
+                    statusText.innerText = `[ RENDERER ] SYNTHESIZING VISUALS: PAGE 0${i + 1} OF 0${manuscript.pages.length}...`;
+
+                    const imgRes = await fetch(`https://gen.pollinations.ai/image/${encodeURIComponent(visualConcept)}?model=flux&width=1280&height=720`, {
+                        headers: { 'Authorization': `Bearer ${apiKey}` }
+                    });
+
+                    if (!imgRes.ok) throw new Error("RENDERER FAILED ON PAGE " + (i + 1));
+                    window.currentImages.push(URL.createObjectURL(await imgRes.blob()));
+                }
+
+                statusText.innerText = "PIPELINE COMPLETE. TRANSITIONING VIEWPORT.";
+
+                // Switch view
+                mainView.classList.add('hidden');
+                workspaceContainer.classList.remove('hidden');
+                renderBookView();
+
+                setTimeout(fetchAccountData, 3000);
+
+            } catch (err) {
+                console.error(err);
+                showGlobalError(`SYSTEM HALTED: ${err.message}`);
+            } finally {
+                generateBtn.innerText = "INITIALIZE NEW SEQUENCE";
+                generateBtn.classList.remove('bg-transparent', 'text-white', 'pointer-events-none');
+                generateBtn.classList.add('bg-white', 'text-ink');
+                generateBtn.disabled = false;
+                statusText.classList.remove('pulse-text');
+            }
+        };
+
+        // Feature 3: Per-Page Regeneration Contextually Scoped
+        window.regeneratePage = async (index) => {
+            if (!checkBalance('regenerate')) return;
+
+            const btn = document.getElementById(`regen-btn-${index}`);
+            const pageEl = document.getElementById(`page-wrapper-${index}`);
+
+            const originalText = btn.innerText;
+            btn.innerText = "REWRITING...";
+            btn.disabled = true;
+            pageEl.style.opacity = '0.5';
+
+            try {
+                const customConfig = window.currentCustom ? `\n\nCRITICAL CUSTOM RULE: ${window.currentCustom}` : '';
+                const prompt = `You are rewriting a specific section of a luxury editorial.
+            Theme: ${window.currentTopic}
+            Tone: ${window.currentStyle}${customConfig}
+            
+            Original Concept Target: ${window.currentManuscript.pages[index].page_title}
+            Context: Maintain the high-end vocabulary and precise formatting. Write beautiful HTML inside the "content".
+            
+            Return ONLY valid JSON:
+            {
+                "page_title": "Sophisticated Section Heading",
+                "content": "<p>A breathtaking rewrite.</p>"
+            }`;
+
+                const res = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'openai',
+                        messages: [{ role: 'user', content: prompt }],
+                        response_format: { type: "json_object" },
+                        temperature: 0.6
+                    })
+                });
+
+                if (!res.ok) throw new Error("API Failure");
+                const data = await res.json();
+                const newContent = parseAIJson(data.choices[0].message.content);
+
+                window.currentManuscript.pages[index].page_title = newContent.page_title;
+                window.currentManuscript.pages[index].content = newContent.content;
+
+                document.getElementById(`page-title-${index}`).innerHTML = newContent.page_title;
+                document.getElementById(`page-content-${index}`).innerHTML = newContent.content;
+
+                setTimeout(fetchAccountData, 2000);
+
+            } catch (err) {
+                showGlobalError("Regeneration matrix failed.");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+                pageEl.style.opacity = '1';
+            }
+        };
+
+        // Feature 1: Split-Screen Critique System
+        const critiqueBtn = document.getElementById('critique-btn');
+        document.getElementById('close-critique').onclick = () => {
+            critiquePanel.classList.remove('w-[400px]', 'md:w-[450px]');
+            critiquePanel.classList.add('w-0');
+            bookContainer.style.width = '100%';
+        };
+
+        critiqueBtn.onclick = async () => {
+            if (critiquePanel.classList.contains('w-[400px]') || critiquePanel.classList.contains('md:w-[450px]')) {
+                // Already open -> CLOSE
+                critiquePanel.classList.remove('w-[400px]', 'md:w-[450px]');
+                critiquePanel.classList.add('w-0');
+                bookContainer.style.width = '100%';
+                return;
+            }
+
+            if (!checkBalance('critique')) return;
+
+            // OPEN split screen
+            critiquePanel.classList.remove('w-0');
+            critiquePanel.classList.add('w-[400px]', 'md:w-[450px]');
+            // Decrease book container width nicely
+            bookContainer.style.width = 'calc(100% - 450px)';
+
+            critiqueContent.innerHTML = '<p class="text-sm tracking-widest text-white/50 animate-pulse uppercase">Vogue Persona Loading...</p>';
+
+            try {
+                const prompt = `Act as the Editor-in-Chief of Vogue. Your tone must be elite, extremely sharp, slightly pretentious, and deeply analytical.
+            Score this editorial layout out of 10. Give exactly three "Dos" (what worked beautifully) and exactly three "Don'ts" (what failed conceptually).
+            Return ONLY valid JSON:
+            {
+                "score": "8.5/10",
+                "dos": ["Masterful pacing", "The Bauhaus minimalism shone"],
+                "donts": ["Page 2 was pedestrian", "Lacked a daring hook"],
+                "summary": "A sharp, albeit conceptually timid, execution of a breathtaking topic."
+            }
+            Manuscript to Review: ${JSON.stringify(window.currentManuscript)}`;
+
+                const res = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'openai',
+                        messages: [{ role: 'user', content: prompt }],
+                        response_format: { type: "json_object" },
+                        temperature: 0.6
+                    })
+                });
+
+                if (!res.ok) throw new Error("Critique system down.");
+                const data = await res.json();
+                const result = parseAIJson(data.choices[0].message.content);
+
+                critiqueContent.innerHTML = `
+                <div class="mb-8">
+                    <p class="text-[5rem] font-serif text-white mb-0 leading-none">${result.score}</p>
+                    <p class="text-[0.6rem] tracking-[0.3em] text-white/40 uppercase border-b border-white/20 pb-4 mt-2">Editorial Verdict</p>
+                </div>
+                
+                <div class="mb-8">
+                    <h4 class="text-[0.7rem] tracking-[0.3em] uppercase text-white mb-4 bg-white/5 py-2 px-3 inline-block">The Masterstrokes</h4>
+                    <ul class="list-none space-y-3">
+                        ${result.dos.map(d => `<li class="text-sm font-light text-white/80 before:content-['✓'] before:mr-3 before:text-green-500">${d}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="mb-8 border-b border-white/20 pb-8">
+                    <h4 class="text-[0.7rem] tracking-[0.3em] uppercase text-white mb-4 bg-white/5 py-2 px-3 inline-block">The Failures</h4>
+                    <ul class="list-none space-y-3">
+                        ${result.donts.map(d => `<li class="text-sm font-light text-white/80 before:content-['✗'] before:mr-3 before:text-red-500">${d}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-[0.7rem] tracking-[0.3em] uppercase text-white mb-3">Final Word</h4>
+                    <p class="text-base font-serif italic text-white/80 leading-relaxed">"${result.summary}"</p>
+                </div>
+            `;
+                setTimeout(fetchAccountData, 2000);
+            } catch (e) {
+                showGlobalError("The Editor is currently traveling. Try later.");
+                critiquePanel.classList.remove('w-[400px]', 'md:w-[450px]');
+                critiquePanel.classList.add('w-0');
+                bookContainer.style.width = '100%';
+            }
+        };
+
+        // Feature 2: Smart Translation Matrix
+        const translateBtn = document.getElementById('translate-btn');
+        translateBtn.onclick = async () => {
+            const lang = document.getElementById('target-language').value;
+            if (!lang) return showGlobalError("Please input a linguistic target.");
+            if (!checkBalance('translate')) return;
+
+            translateBtn.innerText = "PROCESSING...";
+            translateBtn.disabled = true;
+
+            try {
+                // Reusing memory images implicitly because window.currentImages is unchanged
+                const prompt = `You are a high-end luxury translator fluent in ${lang}.
+            Translate the following JSON manuscript content into ${lang}.
+            CRITICAL: Retain the EXACT strict JSON structure and keys ("title", "introduction", "pages", "page_title", "content"). You must provide valid JSON.
+            
+            JSON Payload:
+            ${JSON.stringify(window.currentManuscript)}`;
+
+                const res = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'openai',
+                        messages: [{ role: 'user', content: prompt }],
+                        response_format: { type: "json_object" },
+                        temperature: 0.2
+                    })
+                });
+
+                if (!res.ok) throw new Error("Translation failed.");
+                const data = await res.json();
+
+                window.currentManuscript = parseAIJson(data.choices[0].message.content);
+                renderBookView();
+                showGlobalError(`SUCCESSFUL TRANSLATION TO ${lang.toUpperCase()}`);
+                setTimeout(fetchAccountData, 2000);
+
+            } catch (e) {
+                showGlobalError("Translation engine failed to map linguistics.");
+            } finally {
+                translateBtn.innerText = "TRANSLATE";
+                translateBtn.disabled = false;
+            }
+        }
+        // Feature 7: Audiobook Generation Pipeline (ElevenLabs via Pollinations BYOP)
+        const chunkText = (text, maxLen = 4000) => {
+            const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+            const chunks = [];
+            let current = "";
+
+            for (const sent of sentences) {
+                if ((current + sent).length > maxLen) {
+                    if (current) chunks.push(current.trim());
+                    current = sent;
+                } else {
+                    current += sent;
+                }
+            }
+            if (current) chunks.push(current.trim());
+            return chunks;
+        };
+
+        const ttsBtn = document.getElementById('tts-btn');
+        ttsBtn.onclick = async () => {
+            if (!checkBalance('audiobook')) return;
+
+            let fullText = window.currentManuscript.title + ". " + window.currentManuscript.introduction + ". ";
+            window.currentManuscript.pages.forEach(p => {
+                let cleanText = p.content.replace(/<[^>]+>/g, ' ');
+                fullText += p.page_title + ". " + cleanText + ". ";
+            });
+
+            if (!apiKey) {
+                // Fallback simulated execution if not authenticated
+                const utterance = new SpeechSynthesisUtterance(fullText);
+                utterance.rate = 0.9;
+                utterance.pitch = 0.9;
+                window.speechSynthesis.speak(utterance);
+                showGlobalError("SIMULATED AUDIOBOOK: WEBSPEECH ENGINE ACTIVE");
+                return;
+            }
+
+            try {
+                ttsBtn.querySelector('span').innerText = "GENERATING AUDIO...";
+                ttsBtn.disabled = true;
+
+                const chunks = chunkText(fullText, 4000);
+
+                showGlobalError(`AUDIOBOOK MATRIX ACTIVE\\nSynthesizing ${chunks.length} chunk(s) in batches...`);
+
+                // Random male voice that locks in for consistency
+                const maleVoices = ["adam", "antoni", "arnold", "josh", "sam", "daniel", "charlie", "james"];
+                const voice = window.currentAudioVoice || maleVoices[Math.floor(Math.random() * maleVoices.length)];
+                window.currentAudioVoice = voice; // Ensure subsequent clicks use the exact same voice
+
+                const audioBlobs = [];
+                const batchSize = 4; // limit parallel connections
+
+                for (let i = 0; i < chunks.length; i += batchSize) {
+                    const batch = chunks.slice(i, i + batchSize);
+
+                    const batchPromises = batch.map(chunk => {
+                        const url = `https://gen.pollinations.ai/audio/${encodeURIComponent(chunk)}?voice=${voice}&key=${apiKey}`;
+                        return fetch(url).then(res => {
+                            if (res.status === 402) throw new Error("Out of pollen limit");
+                            if (!res.ok) throw new Error(`TTS operation failed: ${res.status}`);
+                            return res.blob();
+                        });
+                    });
+
+                    const batchResults = await Promise.all(batchPromises);
+                    audioBlobs.push(...batchResults);
+
+                    // Add tiny delay between batches to respect rate limits
+                    if (i + batchSize < chunks.length) await new Promise(r => setTimeout(r, 100));
+                }
+
+                // Combine all sequentially ordered chunks into a seamless buffer
+                const finalBlob = new Blob(audioBlobs, { type: "audio/mpeg" });
+                const audioUrl = URL.createObjectURL(finalBlob);
+                const audio = new Audio(audioUrl);
+                audio.play();
+
+                showGlobalError("AUDIOBOOK MATRIX COMPLETE");
+                setTimeout(fetchAccountData, 2000);
+
+            } catch (e) {
+                showGlobalError(e.message);
+            } finally {
+                console.log("Audiobook operation ended");
+                ttsBtn.disabled = false;
+                if (ttsBtn.querySelector('span')) {
+                    ttsBtn.querySelector('span').innerText = "AUDIOBOOK";
+                }
+            }
+        };   
+    </script>
+</body>
+
+</html>
