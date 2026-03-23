@@ -450,32 +450,38 @@ function showPollenErr(msg) {
 }
 function setProgress(pct) { document.getElementById('prog-bar').style.width = pct + '%'; }
 
-// FIX 4: Retry wrapper with exponential backoff + 429 handling
+// Retry only on network failure or 429/5xx. Never retry 4xx client errors.
 async function fetchWithRetry(url, options = {}, retries = 3) {
   for (let i = 0; i < retries; i++) {
+    let r;
     try {
-      const r = await fetch(url, options);
-      if (r.ok) return r;
-      if (r.status === 429 || r.status >= 500) {
-        if (i < retries - 1) await new Promise(res => setTimeout(res, 1000 * Math.pow(2, i)));
-        else throw new Error(`HTTP ${r.status} after ${retries} retries`);
-      } else {
-        throw new Error(`HTTP ${r.status}`);
-      }
-    } catch(e) {
-      if (i === retries - 1) throw e;
-      await new Promise(res => setTimeout(res, 800 * (i + 1)));
+      r = await fetch(url, options);
+    } catch(networkErr) {
+      // Pure network failure (offline, DNS, etc.) — retryable
+      if (i === retries - 1) throw networkErr;
+      await new Promise(res => setTimeout(res, 800 * Math.pow(2, i)));
+      continue;
     }
+    if (r.ok) return r;
+    // 4xx client errors are never retryable — fail immediately with body hint
+    if (r.status < 500 && r.status !== 429) {
+      let hint = '';
+      try { const j = await r.json(); hint = j.error?.message || j.message || ''; } catch(_) {}
+      throw new Error(`HTTP ${r.status}${hint ? ': ' + hint : ''}`);
+    }
+    // 429 / 5xx — retryable with backoff
+    if (i < retries - 1) await new Promise(res => setTimeout(res, 1000 * Math.pow(2, i)));
+    else throw new Error(`HTTP ${r.status} after ${retries} retries`);
   }
 }
 
-// FIX 2+4: fetchImgBlob with retry, private=true, blob revocation support
+// Blob fetch with retry + blob URL revocation (FIX 2)
 async function fetchImgBlob(prompt, oldUrl = null) {
   const r = await fetchWithRetry(
-    `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}?model=flux&width=1280&height=720&private=true`,
+    `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}?model=flux&width=1280&height=720&nologo=true`,
     { headers: { Authorization: `Bearer ${apiKey}` } }
   );
-  if (oldUrl) URL.revokeObjectURL(oldUrl); // FIX 2: cleanup old blob
+  if (oldUrl) URL.revokeObjectURL(oldUrl);
   return URL.createObjectURL(await r.blob());
 }
 
