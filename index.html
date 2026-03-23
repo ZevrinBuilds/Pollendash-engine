@@ -5,80 +5,167 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universal AI E-Book Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Premium Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,800;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: '#E0E7FF',
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        .book-page { page-break-after: always; }
-        @media print { .no-print { display: none !important; } }
+        /* Custom UI Animations & Glassmorphism */
+        body { background-color: #0f172a; color: #f8fafc; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
         
-        /* MAGIC SAUCE: This styles the HTML the AI generates! */
-        .formatted-content p { margin-bottom: 1.25rem; line-height: 1.7; font-size: 1.125rem; }
-        .formatted-content h3 { font-size: 1.5rem; font-weight: 700; color: #3730a3; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 2px solid #e0e7ff; padding-bottom: 0.5rem; }
-        .formatted-content ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1.5rem; }
-        .formatted-content ol { list-style-type: decimal; margin-left: 1.5rem; margin-bottom: 1.5rem; }
-        .formatted-content li { margin-bottom: 0.5rem; font-size: 1.125rem; }
-        .formatted-content strong { color: #1e1b4b; }
+        /* The Background Overlay from the Video Tutorial */
+        .hero-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2;
+            background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover; background-position: center;
+        }
+        .hero-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            background: linear-gradient(to bottom, rgba(15,23,42,0.6) 0%, rgba(15,23,42,0.95) 100%);
+        }
+
+        /* High-End Editorial Book Design */
+        .book-wrapper { background: #ffffff; color: #111827; }
+        .book-page { page-break-after: always; padding: 4rem 2rem; max-width: 800px; margin: 0 auto; }
+        
+        /* Magic HTML formatting for the AI output */
+        .formatted-content p { font-family: 'Inter', sans-serif; font-size: 1.125rem; line-height: 1.8; margin-bottom: 1.5rem; color: #374151; font-weight: 300; }
+        /* Drop Cap for the first letter of the first paragraph */
+        .formatted-content > p:first-of-type::first-letter { float: left; font-size: 4.5rem; line-height: 0.8; padding-top: 4px; padding-right: 8px; font-family: 'Playfair Display', serif; font-weight: 800; color: #111827; }
+        
+        .formatted-content h3 { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 700; color: #111827; margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; }
+        .formatted-content ul, .formatted-content ol { font-family: 'Inter', sans-serif; margin-left: 1.5rem; margin-bottom: 2rem; color: #374151; font-size: 1.125rem; line-height: 1.8;}
+        .formatted-content li { margin-bottom: 0.5rem; }
+        .formatted-content strong { font-weight: 600; color: #000; }
+
+        @media print { 
+            .no-print, .hero-bg, .hero-overlay { display: none !important; }
+            body, .book-wrapper { background: white !important; color: black !important; }
+            .book-page { padding: 0; max-width: 100%; margin: 0; }
+        }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen font-sans text-gray-800">
+<body class="antialiased min-h-screen relative font-sans">
 
-    <!-- Navbar -->
-    <nav class="bg-indigo-600 text-white p-4 shadow-md flex justify-between items-center no-print">
-        <h1 class="text-2xl font-bold">📚 AI E-Book Engine</h1>
-        <a id="auth-btn" class="bg-white text-indigo-600 px-4 py-2 rounded font-bold hover:bg-gray-100 hidden cursor-pointer">
-            Connect with Pollinations
+    <!-- Transparent Web Design: Full Screen Backgrounds -->
+    <div class="hero-bg no-print"></div>
+    <div class="hero-overlay no-print"></div>
+
+    <!-- Transparent Navbar -->
+    <nav class="w-full flex justify-between items-center p-6 md:px-12 no-print z-50 absolute top-0 left-0">
+        <h1 class="text-2xl font-serif font-bold tracking-wide text-white flex items-center gap-2">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            AI E-Book Studio
+        </h1>
+        <a id="auth-btn" class="glass-panel text-white px-6 py-2.5 rounded-full font-medium text-sm hover:bg-white/10 transition cursor-pointer border border-white/30 hidden">
+            Connect Pollinations
         </a>
-        <div id="user-status" class="hidden flex items-center space-x-4">
-            <span id="tier-badge" class="bg-indigo-800 px-3 py-1 rounded-full text-sm font-bold shadow-inner">🍄 Spore</span>
-            <span class="font-medium text-sm">Balance: <span id="pollen-balance">...</span></span>
+        <div id="user-status" class="hidden flex items-center space-x-3 glass-panel px-4 py-2 rounded-full border border-white/20">
+            <span id="tier-badge" class="bg-white/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white">🍄 Spore</span>
+            <span class="font-light text-sm text-gray-200">Balance: <span id="pollen-balance" class="font-semibold text-white">...</span></span>
         </div>
     </nav>
 
-    <main class="container mx-auto max-w-4xl p-6">
+    <!-- Main Content -->
+    <main class="relative z-10 container mx-auto px-4 pt-32 pb-20">
         
+        <!-- Hero Text -->
+        <div id="hero-section" class="text-center max-w-3xl mx-auto mb-16 no-print">
+            <h2 class="text-5xl md:text-7xl font-serif font-bold text-white mb-6 leading-tight drop-shadow-lg">
+                Orchestrate your <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">masterpiece.</span>
+            </h2>
+            <p class="text-lg text-gray-300 font-light max-w-xl mx-auto">
+                Define your vision. Our multi-modal engine will write the chapters and generate stunning, style-matched visuals in seconds.
+            </p>
+        </div>
+
         <!-- Auth Warning State -->
-        <div id="auth-warning" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded shadow no-print">
-            <p class="font-bold">Authentication Required</p>
-            <p>Connect securely with Pollinations to orchestrate your book. You pay exactly $0 to us, and you control your own AI usage!</p>
-        </div>
-
-        <!-- Account Limits Dashboard -->
-        <div id="limits-dashboard" class="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg shadow-sm mb-6 hidden no-print flex justify-between items-center">
-            <div>
-                <p class="font-bold text-lg">Your Current Capacity: <span id="max-pages-display" class="text-blue-600">0</span> Pages</p>
-                <p class="text-sm mt-1 text-blue-700">Need more pages? Wait 1 hour for your allowance to reset, or <a href="https://enter.pollinations.ai" target="_blank" class="underline font-bold hover:text-indigo-600">upgrade your tier</a>.</p>
-            </div>
-            <div class="text-3xl">🔋</div>
-        </div>
-
-        <!-- App Control Panel -->
-        <div id="app-panel" class="bg-white p-6 rounded-lg shadow-md mb-8 hidden no-print border border-gray-200">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Orchestrate Your E-Book</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div id="auth-warning" class="glass-panel border-l-4 border-l-blue-400 text-white p-6 mb-8 rounded-xl max-w-2xl mx-auto hidden no-print">
+            <div class="flex items-start gap-4">
+                <span class="text-2xl">🔐</span>
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">E-Book Topic</label>
-                    <input type="text" id="topic" placeholder="e.g. 5 Viral High-Protein Breakfasts" class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Visual & Writing Style</label>
-                    <input type="text" id="style" placeholder="e.g. Modern, Minimalist, Masterchef" class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Number of Pages</label>
-                    <input type="number" id="pages-count" value="4" min="1" class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-                    <p id="page-warning" class="text-xs text-red-500 mt-2 font-bold hidden">⚠️ Exceeds your current pollen balance!</p>
+                    <p class="font-semibold text-lg">Authentication Required</p>
+                    <p class="text-gray-300 text-sm mt-1">Connect securely with Pollinations. You pay exactly $0 to us, using your own API allowance.</p>
                 </div>
             </div>
-            <button id="generate-btn" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-lg shadow-lg hover:bg-indigo-700 transition transform hover:-translate-y-0.5 text-lg">
-                🚀 Generate E-Book
-            </button>
-            <p id="status-text" class="text-sm text-center text-gray-500 mt-4 font-mono font-bold"></p>
         </div>
 
-        <!-- Rendered Book Output -->
-        <div id="book-container" class="bg-white p-8 md:p-12 rounded-xl shadow-2xl hidden border border-gray-100">
-            <div class="text-right mb-8 no-print border-b pb-4">
-                <button onclick="window.print()" class="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-900 font-bold shadow-md transition">🖨️ Print / Save as PDF</button>
+        <!-- Limits Dashboard & App Panel -->
+        <div id="app-wrapper" class="hidden max-w-4xl mx-auto no-print">
+            
+            <div id="limits-dashboard" class="flex justify-between items-center glass-panel p-5 rounded-2xl mb-6">
+                <div>
+                    <p class="font-medium text-gray-200">Current Generation Capacity</p>
+                    <p class="text-2xl font-serif font-bold text-white"><span id="max-pages-display">0</span> Pages Available</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-gray-400">Need more pages?</p>
+                    <a href="https://enter.pollinations.ai" target="_blank" class="text-sm text-blue-300 hover:text-white transition underline">Upgrade Tier</a>
+                </div>
             </div>
-            <div id="book-content"></div>
+
+            <!-- Glassmorphic Input Form -->
+            <div class="glass-panel p-8 md:p-10 rounded-3xl relative overflow-hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-300 mb-2 uppercase tracking-wide">The Concept</label>
+                        <input type="text" id="topic" placeholder="e.g. 5 Viral High-Protein Breakfasts" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl focus:ring-2 focus:ring-blue-400 focus:bg-white/10 outline-none text-white placeholder-gray-500 transition text-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2 uppercase tracking-wide">Aesthetic Style</label>
+                        <input type="text" id="style" placeholder="e.g. Cinematic, Minimalist, Masterchef" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl focus:ring-2 focus:ring-blue-400 focus:bg-white/10 outline-none text-white placeholder-gray-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2 uppercase tracking-wide">Total Pages</label>
+                        <input type="number" id="pages-count" value="4" min="1" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl focus:ring-2 focus:ring-blue-400 focus:bg-white/10 outline-none text-white placeholder-gray-500 transition">
+                        <p id="page-warning" class="text-xs text-red-400 mt-2 font-medium hidden">⚠️ Exceeds your pollen balance!</p>
+                    </div>
+                </div>
+                
+                <button id="generate-btn" class="w-full bg-white text-gray-900 font-bold py-4 rounded-xl hover:bg-gray-200 transition transform hover:-translate-y-1 text-lg flex justify-center items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Generate E-Book
+                </button>
+                <p id="status-text" class="text-sm text-center text-gray-400 mt-5 font-mono"></p>
+            </div>
+        </div>
+
+        <!-- Rendered Book Output (The Editorial Look) -->
+        <div id="book-container" class="mt-20 hidden">
+            <div class="text-center mb-8 no-print">
+                <button onclick="window.print()" class="glass-panel text-white px-8 py-3 rounded-full hover:bg-white/20 font-medium shadow-lg transition flex items-center gap-2 mx-auto">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    Print or Save as PDF
+                </button>
+            </div>
+            
+            <!-- This wrapper acts as the crisp, white 'paper' -->
+            <div class="book-wrapper shadow-2xl rounded-sm overflow-hidden border border-gray-200" id="book-content">
+                <!-- Book content injected here -->
+            </div>
         </div>
 
     </main>
@@ -86,7 +173,7 @@
     <script>
     const authBtn = document.getElementById('auth-btn');
     const authWarning = document.getElementById('auth-warning');
-    const appPanel = document.getElementById('app-panel');
+    const appWrapper = document.getElementById('app-wrapper');
     const userStatus = document.getElementById('user-status');
     const limitsDashboard = document.getElementById('limits-dashboard');
     const maxPagesDisplay = document.getElementById('max-pages-display');
@@ -100,23 +187,30 @@
     const urlHash = new URLSearchParams(location.hash.slice(1));
     let apiKey = urlHash.get('api_key');
 
+    // Remove hash cleanly
+    if(window.location.hash) {
+        window.history.replaceState(null, null, location.pathname);
+    }
+
     if (apiKey) {
         authBtn.classList.add('hidden');
         authWarning.classList.add('hidden');
-        appPanel.classList.remove('hidden');
+        appWrapper.classList.remove('hidden');
         userStatus.classList.remove('hidden');
-        limitsDashboard.classList.remove('hidden');
-        window.history.replaceState(null, null, location.pathname);
         fetchAccountData();
     } else {
+        authWarning.classList.remove('hidden');
         if (window.location.protocol === 'about:' || window.location.protocol === 'blob:') {
             authWarning.innerHTML = `
-                <p class="font-bold text-red-600">⚠️ Error: Running in Preview Mode</p>
-                <p class="text-black mt-2">You are viewing this inside a code compiler preview window. Authentication will <strong>not work</strong> here because compilers block redirects.</p>
-                <p class="text-black mt-2"><strong>How to fix:</strong> Save this code to a file called <code>index.html</code> on your computer and double-click it, or publish it directly to your GitHub Pages live URL to test!</p>
+                <div class="flex items-start gap-4">
+                    <span class="text-2xl">⚠️</span>
+                    <div>
+                        <p class="font-semibold text-red-400 text-lg">Running in Preview Sandbox</p>
+                        <p class="text-gray-300 text-sm mt-1">Authentication is blocked in this compiler. Save this code to <code>index.html</code> on your desktop, or publish to GitHub Pages to test.</p>
+                    </div>
+                </div>
             `;
-            authWarning.classList.replace('bg-yellow-100', 'bg-red-100');
-            authWarning.classList.replace('border-yellow-500', 'border-red-500');
+            authWarning.classList.replace('border-l-blue-400', 'border-l-red-500');
         } else {
             authBtn.classList.remove('hidden');
             const params = new URLSearchParams({
@@ -174,53 +268,57 @@
     const statusText = document.getElementById('status-text');
     const bookContainer = document.getElementById('book-container');
     const bookContent = document.getElementById('book-content');
+    const heroSection = document.getElementById('hero-section');
 
     generateBtn.onclick = async () => {
         const topic = document.getElementById('topic').value;
         const style = document.getElementById('style').value;
         const pagesCount = parseInt(document.getElementById('pages-count').value);
 
-        if(!topic || !style) return alert("Please fill out Topic and Style!");
-        if(pagesCount > maxAllowedPages) return alert(`You only have enough pollen for ${maxAllowedPages} pages!`);
+        if(!topic || !style) return alert("Please specify the Topic and Aesthetic Style.");
+        if(pagesCount > maxAllowedPages) return alert(`Not enough pollen. Limit: ${maxAllowedPages} pages.`);
 
         try {
             generateBtn.disabled = true;
-            generateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            generateBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-900 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing Blueprint...`;
+            generateBtn.classList.add('opacity-90', 'cursor-wait');
+            
             bookContainer.classList.add('hidden');
             bookContent.innerHTML = '';
-
-            statusText.innerText = "✍️ Brainstorming & Structuring E-Book (Prompting OpenAI)...";
             
-            // --- THE NEW ELITE PROMPT ---
-            const prompt = `You are a world-class E-Book Author, Expert Educator, and Elite Midjourney/Flux Prompt Engineer.
-            Task: Write a highly engaging, highly structured, practical, and valuable e-book about "${topic}".
-            Constraints: The book MUST have exactly ${pagesCount} chapters/pages.
-            Tone & Aesthetic: "${style}".
+            // Fade out the hero text to put focus on the loading state
+            heroSection.style.opacity = '0.3';
 
-            CRITICAL INSTRUCTIONS FOR BOOK CONTENT:
-            1. Do NOT write abstract, flowery poetry. Write real, actionable, high-value content!
-            2. If it is a recipe or a how-to guide, provide EXACT ingredients, exact measurements, and numbered step-by-step instructions. 
-            3. You MUST format the "content" field using rich HTML tags to make it beautiful. 
-               - Use <h3> for subheadings (e.g., <h3>Ingredients</h3>).
+            statusText.innerHTML = "✍️ <strong>Phase 1/2:</strong> Architecting content and formatting editorial layout...";
+            
+            const prompt = `You are a world-class E-Book Author, NYT Best-Selling Educator, and Elite Midjourney/Flux Prompt Engineer.
+            Task: Write a highly engaging, structured, and valuable e-book about "${topic}".
+            Constraints: Exactly ${pagesCount} pages.
+            Aesthetic Style: "${style}".
+
+            CRITICAL INSTRUCTIONS FOR CONTENT:
+            1. Write actionable, high-value content. If it's a recipe or guide, use exact measurements and numbered steps.
+            2. Format the "content" field using rich HTML for an editorial layout:
+               - Use <h3> for subheadings.
                - Use <p> for paragraphs.
                - Use <ul> and <li> for bulleted lists.
                - Use <ol> and <li> for numbered steps.
-               - Use <strong> to highlight important words.
+               - Use <strong> for emphasis.
             
             RULES FOR IMAGE PROMPTS (FLUX AI): 
-            1. Describe the subject, environment, and lighting in comma-separated tags.
-            2. End with: "masterpiece, 8k resolution, highly detailed, vivid colors, cinematic lighting, professional photography".
-            3. ABSOLUTELY NO TEXT, NO TYPOGRAPHY, NO LETTERS IN THE IMAGE PROMPTS. 
+            1. Describe the subject, environment, and lighting.
+            2. End with: "masterpiece, 8k resolution, highly detailed, vivid colors, cinematic lighting, editorial photography".
+            3. ABSOLUTELY NO TEXT OR LETTERS IN THE IMAGE PROMPTS. 
 
-            You MUST reply ONLY with a valid JSON object matching this exact structure:
+            Reply ONLY with a valid JSON object:
             {
-                "title": "A viral, catchy title for the entire book",
-                "introduction": "A compelling, high-energy hook to start the book.",
+                "title": "A viral, catchy title",
+                "introduction": "A compelling, high-energy hook.",
                 "pages":[
                     {
-                        "page_title": "Clear & Catchy Page Title",
-                        "content": "<p>A short intro paragraph.</p><h3>What You Need</h3><ul><li>Item 1</li><li>Item 2</li></ul><h3>Step-by-Step Instructions</h3><ol><li>Step 1...</li><li>Step 2...</li></ol>",
-                        "image_prompt": "[Subject], [Environment], [Lighting], [Style], masterpiece, highly detailed, 8k"
+                        "page_title": "Clear Chapter Title",
+                        "content": "<p>A short intro paragraph.</p><h3>What You Need</h3><ul><li>Item 1</li></ul>",
+                        "image_prompt": "[Subject], [Environment], [Lighting],[Style], masterpiece, highly detailed, 8k"
                     }
                 ]
             }`;
@@ -232,66 +330,80 @@
                     model: 'openai',
                     messages:[{ role: 'user', content: prompt }],
                     response_format: { type: "json_object" },
-                    temperature: 0.5 // Lowered temperature to force stricter adherence to HTML structure
+                    temperature: 0.4
                 })
             });
 
             if(!textRes.ok) throw new Error("Failed to generate text blueprint.");
             
             const textData = await textRes.json();
-            
-            // Clean up the JSON if AI wraps it in markdown blocks
-            let rawJson = textData.choices[0].message.content;
-            rawJson = rawJson.replace(/```json/g, '').replace(/```/g, '').trim();
+            let rawJson = textData.choices[0].message.content.replace(/```json/g, '').replace(/```/g, '').trim();
             const blueprint = JSON.parse(rawJson);
 
-            // Render Title Page
+            // COVER PAGE - Minimalist & Elegant
             bookContent.innerHTML += `
-                <div class="book-page text-center py-24 flex flex-col justify-center min-h-[800px]">
-                    <h1 class="text-5xl md:text-7xl font-extrabold mb-8 text-indigo-900 leading-tight">${blueprint.title}</h1>
-                    <p class="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto italic leading-relaxed">${blueprint.introduction}</p>
+                <div class="book-page flex flex-col justify-center text-center min-h-[1056px] bg-white relative">
+                    <div class="absolute top-12 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gray-900 rounded"></div>
+                    <h1 class="text-6xl md:text-8xl font-serif font-black mb-8 text-gray-900 leading-[1.1] tracking-tight px-4">${blueprint.title}</h1>
+                    <p class="text-xl md:text-3xl text-gray-500 font-light max-w-2xl mx-auto italic leading-relaxed px-8">${blueprint.introduction}</p>
+                    <div class="absolute bottom-12 left-0 w-full text-center text-gray-400 font-sans tracking-widest uppercase text-sm">
+                        Generated by AI E-Book Studio
+                    </div>
                 </div>
             `;
             bookContainer.classList.remove('hidden');
 
-            // Render Each Page
+            // PAGES LOOP
             for (let i = 0; i < blueprint.pages.length; i++) {
                 const page = blueprint.pages[i];
-                statusText.innerText = `🖼️ Generating stunning image for Page ${i + 1} of ${blueprint.pages.length} (Prompting FLUX AI)...`;
+                statusText.innerHTML = `🎨 <strong>Phase 2/2:</strong> Rendering cinematic image for Page ${i + 1}/${blueprint.pages.length}...`;
 
-                const imgRes = await fetch(`https://gen.pollinations.ai/image/${encodeURIComponent(page.image_prompt)}?model=flux&width=1024&height=768`, {
+                const imgRes = await fetch(`https://gen.pollinations.ai/image/${encodeURIComponent(page.image_prompt)}?model=flux&width=1080&height=720`, {
                     headers: { 'Authorization': `Bearer ${apiKey}` }
                 });
 
                 if(!imgRes.ok) throw new Error(`Failed to generate image for page ${i+1}`);
-                
                 const imgUrl = URL.createObjectURL(await imgRes.blob());
 
+                // EDITORIAL PAGE SPREAD
                 bookContent.innerHTML += `
-                    <div class="book-page py-12 max-w-4xl mx-auto">
-                        <h2 class="text-4xl font-extrabold mb-8 text-indigo-900 border-b-4 border-indigo-200 pb-4">Chapter ${i + 1}: ${page.page_title}</h2>
-                        <img src="${imgUrl}" alt="Illustration" class="w-full h-[400px] md:h-[600px] object-cover rounded-2xl shadow-xl mb-10 border border-gray-200">
+                    <div class="book-page bg-white">
+                        <!-- Full bleed image header -->
+                        <div class="w-full h-[500px] mb-12 relative overflow-hidden -mt-16 -mx-8 w-[calc(100%+4rem)]">
+                            <img src="${imgUrl}" alt="Chapter Illustration" class="w-full h-full object-cover">
+                        </div>
                         
-                        <!-- This is where the magic CSS formatting applies! -->
-                        <div class="formatted-content text-gray-800">
-                            ${page.content}
+                        <div class="px-4 md:px-8">
+                            <div class="flex items-center gap-4 mb-8">
+                                <span class="text-5xl font-serif font-black text-gray-200">0${i + 1}</span>
+                                <h2 class="text-3xl md:text-5xl font-serif font-bold text-gray-900">${page.page_title}</h2>
+                            </div>
+                            
+                            <div class="formatted-content">
+                                ${page.content}
+                            </div>
                         </div>
                     </div>
                 `;
                 
-                // Scroll down smoothly to show progress
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                // Scroll down slowly to reveal pages
+                bookContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
 
-            statusText.innerText = "✨ E-Book Masterpiece Complete! Ready to Print / Save as PDF.";
+            statusText.innerHTML = "✨ Masterpiece Complete! Ready to Print / Save as PDF.";
+            generateBtn.innerHTML = `🚀 Create Another`;
+            heroSection.style.opacity = '1';
+            
             setTimeout(fetchAccountData, 3000); 
 
         } catch (err) {
             console.error(err);
-            statusText.innerText = "❌ Generation failed. " + err.message;
+            statusText.innerHTML = `<span class="text-red-400">❌ Error: ${err.message}</span>`;
+            generateBtn.innerHTML = `🚀 Retry Generation`;
+            heroSection.style.opacity = '1';
         } finally {
             generateBtn.disabled = false;
-            generateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            generateBtn.classList.remove('opacity-90', 'cursor-wait');
         }
     };
     </script>
