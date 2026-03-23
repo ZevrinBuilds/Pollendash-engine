@@ -178,6 +178,14 @@
             <p class="text-xs font-sans tracking-[0.2em] uppercase text-white/60 max-w-lg mx-auto leading-loose border border-white/10 p-6 backdrop-blur-sm">
                 Authentication required. Connect your Pollinations node to utilize the multi-modal generation engine at zero platform cost.
             </p>
+            <div class="mt-8 flex flex-col items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" id="tos-agree" class="w-4 h-4 accent-white bg-transparent border border-white/30 rounded-none cursor-pointer">
+                    <label for="tos-agree" class="text-[0.6rem] font-sans tracking-[0.2em] uppercase text-white/60 cursor-pointer">
+                        I AGREE TO THE <a href="#" id="open-tos-initial" class="text-white border-b border-white/30 hover:border-white transition-colors">TERMS OF SERVICE</a>
+                    </label>
+                </div>
+            </div>
         </div>
 
         <!-- The Studio Form (Brutalist Luxury) -->
@@ -396,6 +404,15 @@
         fetchAccountData();
     } else {
         authWarning.classList.remove('hidden');
+        const tosAgree = document.getElementById('tos-agree');
+        const openTosInitial = document.getElementById('open-tos-initial');
+        if (openTosInitial) {
+            openTosInitial.onclick = (e) => {
+                e.preventDefault();
+                document.getElementById('tos-modal').classList.remove('hidden');
+            };
+        }
+        
         if (window.location.protocol === 'about:' || window.location.protocol === 'blob:') {
             authWarning.innerHTML += `
                 <p class="text-xs font-sans tracking-widest uppercase text-red-500 mt-8 border border-red-500/30 p-4 bg-red-500/10">
@@ -404,12 +421,24 @@
             `;
         } else {
             authBtn.classList.remove('hidden');
+            authBtn.classList.add('opacity-30', 'pointer-events-none'); // default disabled
+            
             const params = new URLSearchParams({
                 redirect_url: window.location.href.split('#')[0],
                 permissions: 'profile,balance'
             });
             authBtn.href = `https://enter.pollinations.ai/authorize?${params}`;
             authBtn.target = "_top";
+            
+            if (tosAgree) {
+                tosAgree.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        authBtn.classList.remove('opacity-30', 'pointer-events-none');
+                    } else {
+                        authBtn.classList.add('opacity-30', 'pointer-events-none');
+                    }
+                });
+            }
         }
     }
 
@@ -842,6 +871,7 @@
             translateBtn.innerText = "TRANSLATE";
             translateBtn.disabled = false;
         }
+    }
         // Feature 7: Audiobook Generation Pipeline (ElevenLabs via Pollinations BYOP)
     const chunkText = (text, maxLen = 4000) => {
         const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
@@ -884,25 +914,39 @@
             ttsBtn.querySelector('span').innerText = "GENERATING AUDIO...";
             ttsBtn.disabled = true;
 
-            const chunks = chunkText(fullText, 4000); // 4000 char threshold
+            const chunks = chunkText(fullText, 4000); 
             
-            showGlobalError(`AUDIOBOOK MATRIX ACTIVE\\nSynthesizing ${chunks.length} chunk(s) in parallel...`);
+            showGlobalError(`AUDIOBOOK MATRIX ACTIVE\\nSynthesizing ${chunks.length} chunk(s) in batches...`);
 
-            const voice = "rachel"; // Enforcing consistent voice
-            const audioPromises = chunks.map(async (chunk) => {
-                const url = `https://audio.pollinations.ai/${encodeURIComponent(chunk)}?voice=${voice}&model=elevenlabs`;
-                const res = await fetch(url, {
-                    headers: { 'Authorization': `Bearer ${apiKey}` }
+            // Random male voice that locks in for consistency
+            const maleVoices = ["adam", "antoni", "arnold", "josh", "sam", "daniel", "charlie", "james"];
+            const voice = window.currentAudioVoice || maleVoices[Math.floor(Math.random() * maleVoices.length)];
+            window.currentAudioVoice = voice; // Ensure subsequent clicks use the exact same voice
+
+            const audioBlobs = [];
+            const batchSize = 4; // limit parallel connections
+            
+            for (let i = 0; i < chunks.length; i += batchSize) {
+                const batch = chunks.slice(i, i + batchSize);
+                
+                const batchPromises = batch.map(chunk => {
+                    const url = `https://audio.pollinations.ai/${encodeURIComponent(chunk)}?voice=${voice}&model=elevenlabs`;
+                    return fetch(url, {
+                        headers: { 'Authorization': `Bearer ${apiKey}` }
+                    }).then(res => {
+                        if (res.status === 402) throw new Error("Out of pollen limit");
+                        if (!res.ok) throw new Error(`TTS operation failed: ${res.status}`);
+                        return res.blob();
+                    });
                 });
                 
-                if (res.status === 402) throw new Error("Out of pollen limit");
-                if (!res.ok) throw new Error(`TTS operation failed: ${res.status}`);
+                const batchResults = await Promise.all(batchPromises);
+                audioBlobs.push(...batchResults);
                 
-                return res.blob();
-            });
+                // Add tiny delay between batches to respect rate limits
+                if (i + batchSize < chunks.length) await new Promise(r => setTimeout(r, 100));
+            }
 
-            const audioBlobs = await Promise.all(audioPromises);
-            
             // Combine all sequentially ordered chunks into a seamless buffer
             const finalBlob = new Blob(audioBlobs, { type: "audio/mpeg" });
             const audioUrl = URL.createObjectURL(finalBlob);
@@ -921,7 +965,7 @@
                 ttsBtn.querySelector('span').innerText = "AUDIOBOOK";
             }
         }
-    };   }
+    };   
     </script>
 </body>
 </html>
