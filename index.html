@@ -431,6 +431,10 @@ function parseAIJson(raw) {
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+// FIX 5: Input sanitization — escape quotes, cap length
+function sanitize(s) {
+  return String(s).replace(/["\\]/g, m => '\\' + m).slice(0, 500);
+}
 function checkPollen(need, action) {
   if (currentPollenBalance < need) { showPollenErr(`⚠ You need more pollen to ${action}. Balance: ${currentPollenBalance.toFixed(4)}`); return false; }
   return true;
@@ -446,20 +450,44 @@ function showPollenErr(msg) {
 }
 function setProgress(pct) { document.getElementById('prog-bar').style.width = pct + '%'; }
 
-async function fetchImgBlob(prompt) {
-  const r = await fetch(`https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}?model=flux&width=1280&height=720`, { headers: { Authorization: `Bearer ${apiKey}` } });
-  if (!r.ok) throw new Error('Image generation failed');
+// FIX 4: Retry wrapper with exponential backoff + 429 handling
+async function fetchWithRetry(url, options = {}, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const r = await fetch(url, options);
+      if (r.ok) return r;
+      if (r.status === 429 || r.status >= 500) {
+        if (i < retries - 1) await new Promise(res => setTimeout(res, 1000 * Math.pow(2, i)));
+        else throw new Error(`HTTP ${r.status} after ${retries} retries`);
+      } else {
+        throw new Error(`HTTP ${r.status}`);
+      }
+    } catch(e) {
+      if (i === retries - 1) throw e;
+      await new Promise(res => setTimeout(res, 800 * (i + 1)));
+    }
+  }
+}
+
+// FIX 2+4: fetchImgBlob with retry, private=true, blob revocation support
+async function fetchImgBlob(prompt, oldUrl = null) {
+  const r = await fetchWithRetry(
+    `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}?model=flux&width=1280&height=720&private=true`,
+    { headers: { Authorization: `Bearer ${apiKey}` } }
+  );
+  if (oldUrl) URL.revokeObjectURL(oldUrl); // FIX 2: cleanup old blob
   return URL.createObjectURL(await r.blob());
 }
+
+// FIX 4: chatCompletion with retry + private=true
 async function chatCompletion(messages, temperature = 0.5, json = true) {
-  const body = { model: 'openai', messages, temperature };
+  const body = { model: 'openai', messages, temperature, private: true };
   if (json) body.response_format = { type: 'json_object' };
-  const r = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+  const r = await fetchWithRetry('https://gen.pollinations.ai/v1/chat/completions', {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
-  if (!r.ok) throw new Error(`API error ${r.status}`);
   const d = await r.json();
   return d.choices[0].message.content;
 }
@@ -547,10 +575,11 @@ Return ONLY this JSON (exactly ${pages.length} prompts):
 // ── GENERATE PIPELINE ──────────────────────────────────────
 const generateBtn = document.getElementById('generate-btn');
 generateBtn.onclick = async () => {
-  const topic = document.getElementById('topic').value.trim();
-  const style = document.getElementById('style').value.trim();
+  // FIX 5: sanitize inputs before they enter any prompt
+  const topic = sanitize(document.getElementById('topic').value.trim());
+  const style = sanitize(document.getElementById('style').value.trim());
   const pages = parseInt(document.getElementById('pages-count').value);
-  const custom = document.getElementById('custom-instructions').value.trim();
+  const custom = sanitize(document.getElementById('custom-instructions').value.trim());
   if (!topic || !style) { alert('Subject Matter and Art Direction are required.'); return; }
   const cost = pages * 0.0012 + 0.0003;
   if (!checkPollen(cost, 'generate this book')) return;
@@ -584,16 +613,21 @@ generateBtn.onclick = async () => {
     bookContent.innerHTML = buildCoverPageHTML(currentManuscript, coverBlobUrl);
     document.getElementById('output-area').classList.remove('hidden');
 
-    for (let i = 0; i < currentManuscript.pages.length; i++) {
-      const pct = 45 + Math.round(((i+1)/currentManuscript.pages.length)*50);
-      document.getElementById('status-text').innerText = `[ RENDERER ] PAGE ${i+1}/${currentManuscript.pages.length}…`;
-      const prompt = currentArtDirection.image_prompts[i] || `${topic}, ${style}, award-winning editorial photography, 8k`;
-      const url = await fetchImgBlob(prompt);
-      currentImageUrls[i] = url;
-      bookContent.innerHTML += buildPageHTML(i, currentManuscript.pages[i], url, currentManuscript.title);
-      setProgress(pct);
-      document.getElementById('output-area').scrollIntoView({ behavior:'smooth', block:'end' });
-    }
+    // FIX 3: Generate all images in parallel instead of sequentially
+    document.getElementById('status-text').innerText = `[ RENDERER ] GENERATING ${currentManuscript.pages.length} IMAGES IN PARALLEL…`;
+    setProgress(50);
+    const imagePrompts = currentManuscript.pages.map((_, i) =>
+      currentArtDirection.image_prompts[i] || `${topic}, ${style}, award-winning editorial photography, 8k`
+    );
+    // Revoke any old blob URLs first (FIX 2)
+    currentImageUrls.forEach(u => { if (u) URL.revokeObjectURL(u); });
+    currentImageUrls = await Promise.all(imagePrompts.map(p => fetchImgBlob(p)));
+    setProgress(85);
+    // Render pages now that all images are ready
+    currentManuscript.pages.forEach((page, i) => {
+      bookContent.innerHTML += buildPageHTML(i, page, currentImageUrls[i], currentManuscript.title);
+    });
+    document.getElementById('output-area').scrollIntoView({ behavior:'smooth', block:'end' });
 
     setProgress(100);
     document.getElementById('status-text').innerText = 'PIPELINE COMPLETE.';
@@ -660,7 +694,8 @@ Return ONLY raw HTML using <p>,<h3>,<ul> tags. No JSON, no wrapper.` }], 0.65, f
     currentManuscript.pages[i].content = newContent;
     contEl.innerHTML = newContent;
     imgEl.style.opacity = '0.3';
-    const url = await fetchImgBlob(newPromptRaw.trim());
+    // FIX 2: pass old URL so it gets revoked after new blob is created
+    const url = await fetchImgBlob(newPromptRaw.trim(), currentImageUrls[i]);
     currentImageUrls[i] = url;
     imgEl.src = url; imgEl.style.opacity = '1';
     btn.innerText = '✓ Done';
@@ -778,10 +813,12 @@ async function generateAudiobook() {
         if (!r.ok) throw new Error(`ElevenLabs error ${r.status}`);
         audioUrl = URL.createObjectURL(await r.blob());
       } else {
-        // Pollinations TTS
+        // FIX 1: Correct Pollinations TTS endpoint is audio.pollinations.ai
         const polVoice = isELVoice ? 'nova' : voice;
-        const r = await fetch(`https://gen.pollinations.ai/audio/${encodeURIComponent(seg.text.slice(0,1000))}?voice=${polVoice}`, { headers:{ Authorization:`Bearer ${apiKey}` } });
-        if (!r.ok) throw new Error('Pollinations TTS failed');
+        const r = await fetchWithRetry(
+          `https://audio.pollinations.ai/${encodeURIComponent(seg.text.slice(0,1000))}?voice=${polVoice}&private=true`,
+          { headers:{ Authorization:`Bearer ${apiKey}` } }
+        );
         audioUrl = URL.createObjectURL(await r.blob());
       }
       const track = document.createElement('div');
