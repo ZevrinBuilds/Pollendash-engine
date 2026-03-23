@@ -150,7 +150,7 @@
     <nav class="w-full flex flex-col md:flex-row justify-between items-center p-8 md:px-16 no-print z-50 fixed top-0 left-0 mix-blend-difference gap-4">
         <div class="flex flex-col items-center md:items-start">
             <h1 class="text-sm font-sans tracking-[0.3em] uppercase text-white font-light flex items-center gap-3">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                <img src="https://raw.githubusercontent.com/pollinations/pollinations/main/assets/logo.svg" alt="Pollinations Logo" class="w-6 h-6 invert">
                 E-Book Studio
             </h1>
             <p class="text-[0.6rem] font-sans tracking-[0.2em] uppercase text-white/50 mt-1">Engine Powered by Pollinations AI</p>
@@ -272,7 +272,7 @@
             <!-- Enhanced Footer Logo (Branding) -->
             <div class="text-center py-20 bg-cream border-t border-gray-200">
                 <div class="flex justify-center items-center gap-4 mb-4 text-ink">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    <img src="https://raw.githubusercontent.com/pollinations/pollinations/main/assets/logo.svg" alt="Pollinations Logo" class="w-7 h-7">
                     <p class="text-lg font-sans tracking-[0.3em] uppercase font-light">Pollinations AI</p>
                 </div>
                 <p class="text-[0.65rem] font-sans tracking-[0.3em] uppercase text-gray-500 mb-4">Concept to Reality</p>
@@ -842,23 +842,36 @@
             translateBtn.innerText = "TRANSLATE";
             translateBtn.disabled = false;
         }
+        // Feature 7: Audiobook Generation Pipeline (ElevenLabs via Pollinations BYOP)
+    const chunkText = (text, maxLen = 4000) => {
+        const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+        const chunks = [];
+        let current = "";
+        
+        for (const sent of sentences) {
+            if ((current + sent).length > maxLen) {
+                if (current) chunks.push(current.trim());
+                current = sent;
+            } else {
+                current += sent;
+            }
+        }
+        if (current) chunks.push(current.trim());
+        return chunks;
     };
 
-    // Feature 7: Audiobook Generation Pipeline (ElevenLabs)
     const ttsBtn = document.getElementById('tts-btn');
     ttsBtn.onclick = async () => {
         if(!checkBalance('audiobook')) return;
 
-        const elApiKey = prompt("AUDIOBOOK PIPELINE\n\nEnter your ElevenLabs API Key for high-fidelity voice synthesis.\n(Leave blank to simulate via Web Speech API)");
-        
         let fullText = window.currentManuscript.title + ". " + window.currentManuscript.introduction + ". ";
         window.currentManuscript.pages.forEach(p => {
             let cleanText = p.content.replace(/<[^>]+>/g, ' '); 
             fullText += p.page_title + ". " + cleanText + ". ";
         });
 
-        if(!elApiKey) {
-            // Fallback simulated execution
+        if(!apiKey) {
+            // Fallback simulated execution if not authenticated
             const utterance = new SpeechSynthesisUtterance(fullText);
             utterance.rate = 0.9;
             utterance.pitch = 0.9;
@@ -868,31 +881,35 @@
         }
 
         try {
-            ttsBtn.querySelector('span').innerText = "GENERATING...";
+            ttsBtn.querySelector('span').innerText = "GENERATING AUDIO...";
             ttsBtn.disabled = true;
 
-            const response = await fetch("https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM", {
-                method: "POST",
-                headers: {
-                    "Accept": "audio/mpeg",
-                    "Content-Type": "application/json",
-                    "xi-api-key": elApiKey
-                },
-                body: JSON.stringify({
-                    text: fullText.substring(0, 4900), // Protect against massive token runs
-                    model_id: "eleven_monolingual_v1",
-                    voice_settings: { stability: 0.5, similarity_boost: 0.5 }
-                })
+            const chunks = chunkText(fullText, 4000); // 4000 char threshold
+            
+            showGlobalError(`AUDIOBOOK MATRIX ACTIVE\\nSynthesizing ${chunks.length} chunk(s) in parallel...`);
+
+            const voice = "rachel"; // Enforcing consistent voice
+            const audioPromises = chunks.map(async (chunk) => {
+                const url = `https://audio.pollinations.ai/${encodeURIComponent(chunk)}?voice=${voice}&model=elevenlabs`;
+                const res = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${apiKey}` }
+                });
+                
+                if (res.status === 402) throw new Error("Out of pollen limit");
+                if (!res.ok) throw new Error(`TTS operation failed: ${res.status}`);
+                
+                return res.blob();
             });
 
-            if(!response.ok) throw new Error("ElevenLabs authentication or synthesis failure.");
+            const audioBlobs = await Promise.all(audioPromises);
             
-            const blob = await response.blob();
-            const audioUrl = URL.createObjectURL(blob);
+            // Combine all sequentially ordered chunks into a seamless buffer
+            const finalBlob = new Blob(audioBlobs, { type: "audio/mpeg" });
+            const audioUrl = URL.createObjectURL(finalBlob);
             const audio = new Audio(audioUrl);
             audio.play();
 
-            showGlobalError("AUDIOBOOK MATRIX ACTIVE");
+            showGlobalError("AUDIOBOOK MATRIX COMPLETE");
             setTimeout(fetchAccountData, 2000); 
             
         } catch(e) {
@@ -904,7 +921,7 @@
                 ttsBtn.querySelector('span').innerText = "AUDIOBOOK";
             }
         }
-    }
+    };   }
     </script>
 </body>
 </html>
