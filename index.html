@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI E-Book Studio | Premium</title>
+    <title>AI Editorial Studio | Powered by Pollinations</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Ultra-Premium Typography: Cormorant (Serif) & Montserrat (Sans) -->
@@ -19,7 +19,7 @@
                     },
                     colors: {
                         cream: '#F9F9F6',
-                        ink: '#0F0F0F',
+                        ink: '#0A0A0A',
                     }
                 }
             }
@@ -36,11 +36,12 @@
             position: fixed; right: 0; bottom: 0;
             min-width: 100%; min-height: 100%;
             width: auto; height: auto; z-index: -2;
-            object-fit: cover; opacity: 0.6;
+            object-fit: cover; opacity: 0.5;
+            filter: grayscale(30%) contrast(120%);
         }
         .video-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
-            background: linear-gradient(180deg, rgba(5,5,5,0.3) 0%, rgba(5,5,5,0.95) 100%);
+            background: linear-gradient(180deg, rgba(5,5,5,0.4) 0%, rgba(5,5,5,0.95) 100%);
         }
 
         /* Swiss Luxury Inputs */
@@ -54,19 +55,20 @@
             width: 100%;
             padding: 0.5rem 0;
             transition: all 0.4s ease;
+            border-radius: 0;
         }
         .luxury-input:focus {
             outline: none;
             border-bottom: 1px solid rgba(255,255,255,1);
+            background: transparent;
         }
         .luxury-input::placeholder { color: rgba(255,255,255,0.15); }
 
         /* The Output: Print Magazine Styling */
-        .magazine-wrapper { background: #F9F9F6; color: #0F0F0F; }
+        .magazine-wrapper { background: #F9F9F6; color: #0A0A0A; }
         .magazine-page { page-break-after: always; padding: 6rem 4rem; max-width: 1200px; margin: 0 auto; min-height: 100vh; }
         
         .formatted-content {
-            /* This makes the text flow in 2 columns like a real magazine */
             column-count: 2;
             column-gap: 4rem;
             text-align: justify;
@@ -76,8 +78,8 @@
         
         /* Massive Drop Cap for the first paragraph */
         .formatted-content > p:first-of-type::first-letter { 
-            float: left; font-size: 6rem; line-height: 0.7; padding-top: 8px; padding-right: 12px; 
-            font-family: 'Cormorant Garamond', serif; font-weight: 400; color: #0F0F0F; 
+            float: left; font-size: 6.5rem; line-height: 0.7; padding-top: 8px; padding-right: 12px; 
+            font-family: 'Cormorant Garamond', serif; font-weight: 400; color: #0A0A0A; 
         }
         
         .formatted-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 400; color: #000; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid #ddd; padding-bottom: 0.5rem; column-span: all; }
@@ -86,7 +88,7 @@
         .formatted-content strong { font-weight: 500; color: #000; }
 
         /* Custom minimal scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #050505; }
         ::-webkit-scrollbar-thumb { background: #333; }
 
@@ -94,33 +96,37 @@
             .no-print, .video-bg, .video-overlay { display: none !important; }
             body, .magazine-wrapper { background: white !important; color: black !important; }
             .magazine-page { padding: 0; max-width: 100%; margin: 0; }
-            .formatted-content { column-count: 2; column-gap: 2rem; }
+            .formatted-content { column-count: 2; column-gap: 3rem; }
         }
+
+        /* Glitch/Pulse animation for loading states */
+        .pulse-text { animation: pulseOpacity 2s infinite; }
+        @keyframes pulseOpacity { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     </style>
 </head>
 <body class="antialiased min-h-screen relative selection:bg-white selection:text-black">
 
     <!-- Cinematic Video Background (Abstract Dark Fluid) -->
     <video autoplay loop muted playsinline class="video-bg no-print">
-        <!-- High-end abstract stock video from a public CDN -->
         <source src="https://cdn.coverr.co/videos/coverr-dark-abstract-waves-2641/1080p.mp4" type="video/mp4">
     </video>
     <div class="video-overlay no-print"></div>
 
     <!-- Transparent, Ultra-Minimal Nav -->
-    <nav class="w-full flex justify-between items-center p-8 md:px-16 no-print z-50 fixed top-0 left-0 mix-blend-difference">
-        <h1 class="text-sm font-sans tracking-[0.3em] uppercase text-white font-light">
-            E-Book Studio
-        </h1>
+    <nav class="w-full flex flex-col md:flex-row justify-between items-center p-8 md:px-16 no-print z-50 fixed top-0 left-0 mix-blend-difference gap-4">
+        <div class="flex flex-col items-center md:items-start">
+            <h1 class="text-sm font-sans tracking-[0.3em] uppercase text-white font-light">E-Book Studio</h1>
+            <p class="text-[0.6rem] font-sans tracking-[0.2em] uppercase text-white/50 mt-1">Engine Powered by Pollinations AI</p>
+        </div>
         
         <a id="auth-btn" class="text-xs font-sans tracking-[0.2em] uppercase text-white border-b border-white/30 pb-1 hover:border-white transition-all cursor-pointer hidden">
-            Authenticate
+            Authenticate Node
         </a>
         
         <div id="user-status" class="hidden flex items-center space-x-6">
-            <span id="tier-badge" class="text-xs font-sans tracking-[0.2em] uppercase text-white/60">SPORE</span>
+            <span id="tier-badge" class="text-[0.6rem] font-sans tracking-[0.3em] uppercase text-white border border-white/20 px-3 py-1">SPORE</span>
             <span class="text-xs font-sans tracking-[0.2em] uppercase text-white">
-                Pollen: <span id="pollen-balance" class="font-medium">...</span>
+                POLLEN: <span id="pollen-balance" class="font-medium">...</span>
             </span>
         </div>
     </nav>
@@ -130,61 +136,69 @@
         
         <!-- Auth Warning State -->
         <div id="auth-warning" class="text-center mb-16 hidden">
-            <h2 class="text-4xl md:text-6xl font-serif text-white mb-4">Access Restricted</h2>
-            <p class="text-sm font-sans tracking-widest uppercase text-white/50 max-w-md mx-auto leading-loose">
-                Authentication required. Connect your Pollinations node to utilize the generation engine at zero cost.
+            <h2 class="text-4xl md:text-6xl font-serif text-white mb-6 tracking-tight">Access Restricted</h2>
+            <p class="text-xs font-sans tracking-[0.2em] uppercase text-white/60 max-w-lg mx-auto leading-loose border border-white/10 p-6 backdrop-blur-sm">
+                Authentication required. Connect your Pollinations node to utilize the multi-modal generation engine at zero platform cost.
             </p>
         </div>
 
         <!-- The Studio Form (Brutalist Luxury) -->
-        <div id="app-wrapper" class="hidden w-full max-w-3xl mx-auto mt-12">
+        <div id="app-wrapper" class="hidden w-full max-w-4xl mx-auto mt-12">
             
-            <div id="limits-dashboard" class="mb-16 flex justify-between items-end border-b border-white/10 pb-4">
-                <p class="text-xs font-sans tracking-[0.2em] uppercase text-white/50">System Capacity</p>
-                <p class="text-sm font-sans tracking-widest text-white"><span id="max-pages-display" class="font-medium text-lg">0</span> PAGES MAX</p>
+            <div id="limits-dashboard" class="mb-20 flex justify-between items-end border-b border-white/10 pb-4">
+                <p class="text-xs font-sans tracking-[0.2em] uppercase text-white/40">Allocated Bandwidth</p>
+                <p class="text-sm font-sans tracking-[0.2em] text-white"><span id="max-pages-display" class="font-medium text-lg">0</span> MAX PAGES</p>
             </div>
 
             <div class="space-y-16">
                 <!-- Input 1 -->
                 <div class="group">
-                    <label class="block text-xs font-sans tracking-[0.2em] text-white/50 mb-2 uppercase transition-colors group-focus-within:text-white">01 / Subject Matter</label>
-                    <input type="text" id="topic" placeholder="e.g. The Architecture of Sound" class="luxury-input">
+                    <label class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase transition-colors group-focus-within:text-white">01 &mdash; Subject Matter</label>
+                    <input type="text" id="topic" placeholder="e.g. The Architecture of Minimalist Sound" class="luxury-input">
                 </div>
                 
                 <!-- Input 2 -->
                 <div class="group">
-                    <label class="block text-xs font-sans tracking-[0.2em] text-white/50 mb-2 uppercase transition-colors group-focus-within:text-white">02 / Art Direction & Tone</label>
-                    <input type="text" id="style" placeholder="e.g. Minimalist, Bauhaus, Melancholic" class="luxury-input">
+                    <label class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase transition-colors group-focus-within:text-white">02 &mdash; Art Direction & Tone</label>
+                    <input type="text" id="style" placeholder="e.g. Bauhaus, High-Contrast, Melancholic" class="luxury-input">
                 </div>
                 
                 <!-- Input 3 -->
                 <div class="group">
-                    <label class="block text-xs font-sans tracking-[0.2em] text-white/50 mb-2 uppercase transition-colors group-focus-within:text-white">03 / Page Count</label>
+                    <label class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase transition-colors group-focus-within:text-white">03 &mdash; Page Count</label>
                     <input type="number" id="pages-count" value="4" min="1" class="luxury-input w-32">
-                    <p id="page-warning" class="text-xs font-sans tracking-widest text-red-500 mt-4 hidden">EXCEEDS ALLOCATED BALANCE</p>
+                    <p id="page-warning" class="text-[0.65rem] font-sans tracking-widest text-red-500 mt-4 hidden uppercase">Insufficient Pollen Balance for this request</p>
                 </div>
             </div>
             
             <!-- Generate Action -->
-            <div class="mt-20 pt-10 text-center">
-                <button id="generate-btn" class="text-sm font-sans tracking-[0.3em] uppercase text-white border border-white px-12 py-5 hover:bg-white hover:text-black transition-all duration-500 w-full md:w-auto">
-                    Initialize Orchestrator
+            <div class="mt-24 pt-10 text-center flex flex-col items-center">
+                <button id="generate-btn" class="text-sm font-sans tracking-[0.3em] uppercase text-ink bg-white border border-white px-16 py-6 hover:bg-transparent hover:text-white transition-all duration-700 w-full md:w-auto shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:shadow-none">
+                    Initialize Dual-Agent Pipeline
                 </button>
-                <p id="status-text" class="text-xs font-sans tracking-[0.2em] uppercase text-white/40 mt-8 h-4"></p>
+                <div id="status-container" class="mt-12 h-8 hidden">
+                    <p id="status-text" class="text-xs font-sans tracking-[0.2em] uppercase text-white pulse-text"></p>
+                </div>
             </div>
         </div>
     </main>
 
     <!-- Rendered Magazine Output -->
     <div id="book-container" class="hidden w-full bg-cream z-20 relative">
-        <div class="text-center py-12 bg-ink no-print sticky top-0 z-30 border-b border-white/10">
-            <button onclick="window.print()" class="text-xs font-sans tracking-[0.2em] uppercase text-white hover:text-white/60 transition-colors">
-                [ Export Editorial ]
+        <div class="text-center py-8 bg-ink no-print sticky top-0 z-30 flex justify-between items-center px-8 border-b border-white/10">
+            <p class="text-[0.65rem] font-sans tracking-[0.3em] uppercase text-white/50">Rendered via Pollinations AI</p>
+            <button onclick="window.print()" class="text-xs font-sans tracking-[0.2em] uppercase text-white hover:text-white/60 transition-colors border border-white/20 px-6 py-3">
+                Export Editorial PDF
             </button>
         </div>
         
         <div class="magazine-wrapper" id="book-content">
             <!-- AI Content Injected Here -->
+        </div>
+
+        <div class="text-center py-16 bg-cream border-t border-gray-200">
+            <p class="text-xs font-sans tracking-[0.3em] uppercase text-gray-400">Concept to Reality</p>
+            <p class="text-sm font-serif italic text-gray-600 mt-2">Brought to life by the Pollinations.ai API ecosystem</p>
         </div>
     </div>
 
@@ -219,8 +233,8 @@
         authWarning.classList.remove('hidden');
         if (window.location.protocol === 'about:' || window.location.protocol === 'blob:') {
             authWarning.innerHTML += `
-                <p class="text-xs font-sans tracking-widest uppercase text-red-500 mt-8">
-                    SYSTEM ERROR: PREVIEW SANDBOX DETECTED.<br>RUN LOCALLY OR DEPLOY TO PROCEED.
+                <p class="text-xs font-sans tracking-widest uppercase text-red-500 mt-8 border border-red-500/30 p-4 bg-red-500/10">
+                    SYSTEM ERROR: PREVIEW SANDBOX DETECTED.<br>RUN LOCALLY (.html file) OR DEPLOY TO GITHUB PAGES TO PROCEED.
                 </p>
             `;
         } else {
@@ -242,9 +256,10 @@
             const balData = await balRes.json();
             
             const balance = balData.balance !== undefined ? parseFloat(balData.balance) : parseFloat(balData);
-            pollenBalanceEl.innerText = isNaN(balance) ? "0.00" : balance.toFixed(2);
+            pollenBalanceEl.innerText = isNaN(balance) ? "0.00" : balance.toFixed(3);
 
-            maxAllowedPages = isNaN(balance) ? 0 : Math.floor(balance / 0.001);
+            // Calculation: Assuming ~0.0001 for text generation + 0.001 per Flux image
+            maxAllowedPages = isNaN(balance) ? 0 : Math.floor(balance / 0.0011);
             maxPagesDisplay.innerText = maxAllowedPages;
             pagesInput.max = maxAllowedPages;
 
@@ -262,11 +277,11 @@
                 if (parseInt(e.target.value) > maxAllowedPages) {
                     pageWarning.classList.remove('hidden');
                     document.getElementById('generate-btn').disabled = true;
-                    document.getElementById('generate-btn').style.opacity = '0.3';
+                    document.getElementById('generate-btn').classList.add('opacity-30', 'pointer-events-none');
                 } else {
                     pageWarning.classList.add('hidden');
                     document.getElementById('generate-btn').disabled = false;
-                    document.getElementById('generate-btn').style.opacity = '1';
+                    document.getElementById('generate-btn').classList.remove('opacity-30', 'pointer-events-none');
                 }
             });
         } catch (err) {
@@ -275,9 +290,22 @@
     }
 
     const generateBtn = document.getElementById('generate-btn');
+    const statusContainer = document.getElementById('status-container');
     const statusText = document.getElementById('status-text');
     const bookContainer = document.getElementById('book-container');
     const bookContent = document.getElementById('book-content');
+
+    // Bulletproof JSON parser for AI outputs
+    function parseAIJson(rawStr) {
+        let cleaned = rawStr.replace(/```json/g, '').replace(/```/g, '').trim();
+        // Sometimes AI puts text before or after the JSON braces
+        const firstBrace = cleaned.indexOf('{');
+        const lastBrace = cleaned.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1) {
+            cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+        }
+        return JSON.parse(cleaned);
+    }
 
     generateBtn.onclick = async () => {
         const topic = document.getElementById('topic').value;
@@ -285,97 +313,140 @@
         const pagesCount = parseInt(document.getElementById('pages-count').value);
 
         if(!topic || !style) {
-            statusText.innerText = "ERROR: REQUIRED FIELDS MISSING";
+            alert("Subject Matter and Art Direction are required.");
             return;
         }
 
         try {
+            // UI State Change
             generateBtn.disabled = true;
-            generateBtn.innerText = "PROCESSING...";
-            generateBtn.classList.add('opacity-50', 'pointer-events-none');
+            generateBtn.innerText = "PIPELINE ACTIVE";
+            generateBtn.classList.add('bg-transparent', 'text-white', 'pointer-events-none');
             
             bookContainer.classList.add('hidden');
             bookContent.innerHTML = '';
+            statusContainer.classList.remove('hidden');
 
-            statusText.innerText = "SYNTHESIZING EDITORIAL BLUEPRINT...";
+            // ====================================================================
+            // AGENT 1: THE AUTHOR (Generates Structure & Content)
+            // ====================================================================
+            statusText.innerText = "[ AGENT 01 ] ARCHITECTING MANUSCRIPT & EDITORIAL COPY...";
             
-            const prompt = `You are a visionary Editor-in-Chief and Elite AI Prompt Architect.
-            Create a highly sophisticated, high-value editorial spread about "${topic}".
-            Pages required: ${pagesCount}. Art direction: "${style}".
+            const authorPrompt = `You are a visionary Editor-in-Chief for a high-end magazine (like Vogue or GQ).
+            Write a profound, highly sophisticated editorial piece about "${topic}".
+            It must be exactly ${pagesCount} pages long.
 
-            RULES FOR CONTENT:
-            1. Write like a premium magazine (Vogue, GQ, Monocle). Professional, insightful, profound.
-            2. Format the "content" field in HTML:
-               - Use <p> for main text.
-               - Use <h3> for elegant sub-headers.
-               - Use <ul> / <ol> for structured breakdowns.
+            FORMATTING RULES:
+            1. Write high-value, insightful, and beautifully paced paragraphs.
+            2. Format the "content" field in HTML: Use <p> for paragraphs, <h3> for elegant sub-headers, and <ul> for lists if needed. Do not use markdown inside the HTML.
             
-            RULES FOR IMAGE PROMPTS (FLUX AI): 
-            1. Create breathtaking, award-winning photography prompts.
-            2. End with: "masterpiece, 8k, highly detailed, cinematic lighting, high-end editorial photography".
-            3. NO TEXT, NO LETTERS, NO TYPOGRAPHY IN THE IMAGE.
-
-            Reply ONLY in this JSON structure:
+            Return ONLY a valid JSON object:
             {
                 "title": "A profound, elegant title",
-                "introduction": "A sophisticated preamble.",
+                "introduction": "A sophisticated preamble/hook.",
                 "pages":[
                     {
                         "page_title": "Chapter Heading",
-                        "content": "<p>Content...</p>",
-                        "image_prompt": "Subject, environment, lighting, style, masterpiece, 8k"
+                        "content": "<p>Content...</p>"
                     }
                 ]
             }`;
 
-            const textRes = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+            const authorRes = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     model: 'openai',
-                    messages:[{ role: 'user', content: prompt }],
+                    messages:[{ role: 'user', content: authorPrompt }],
                     response_format: { type: "json_object" },
-                    temperature: 0.4
+                    temperature: 0.5 // High logic, solid prose
                 })
             });
 
-            if(!textRes.ok) throw new Error("API REJECTION");
-            
-            const textData = await textRes.json();
-            let rawJson = textData.choices[0].message.content.replace(/```json/g, '').replace(/```/g, '').trim();
-            const blueprint = JSON.parse(rawJson);
+            if(!authorRes.ok) throw new Error("AGENT 01 FAILED");
+            const authorData = await authorRes.json();
+            const manuscript = parseAIJson(authorData.choices[0].message.content);
 
-            // THE EDITORIAL COVER
+            // ====================================================================
+            // AGENT 2: THE ART DIRECTOR (Reads the book, generates visual prompts)
+            // ====================================================================
+            statusText.innerText = "[ AGENT 02 ] ANALYZING TEXT & DIRECTING VISUAL CONCEPTS...";
+
+            const artDirectorPrompt = `You are an Elite Art Director & Photography Expert.
+            I will give you a ${pagesCount}-page manuscript. 
+            For EACH page, read the title and content, and design a breathtaking, award-winning photography prompt for an AI image generator (FLUX).
+            The global visual aesthetic must be: "${style}".
+
+            RULES FOR IMAGE PROMPTS:
+            1. Describe the subject, the lighting (e.g., volumetric, cinematic, chiaroscuro), the camera lens (e.g., 35mm, 85mm), and the exact environment.
+            2. End every prompt with: "masterpiece, 8k resolution, highly detailed, high-end editorial photography".
+            3. CRITICAL: NO TEXT, NO LETTERS, NO TYPOGRAPHY IN THE IMAGE. The AI generator will ruin it if you ask for words.
+
+            MANUSCRIPT:
+            ${JSON.stringify(manuscript.pages)}
+
+            Return ONLY a valid JSON object containing exactly ${pagesCount} strings:
+            {
+                "image_prompts": [
+                    "Prompt for page 1...",
+                    "Prompt for page 2..."
+                ]
+            }`;
+
+            const artRes = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'openai',
+                    messages: [{ role: 'user', content: artDirectorPrompt }],
+                    response_format: { type: "json_object" },
+                    temperature: 0.7 // High creativity for art direction
+                })
+            });
+
+            if(!artRes.ok) throw new Error("AGENT 02 FAILED");
+            const artData = await artRes.json();
+            const artDirection = parseAIJson(artData.choices[0].message.content);
+
+            // ====================================================================
+            // AGENT 3: THE RENDERER (FLUX API & DOM INJECTION)
+            // ====================================================================
+
+            // The Cover
             bookContent.innerHTML += `
                 <div class="magazine-page flex flex-col justify-center items-center text-center">
-                    <h1 class="text-7xl md:text-9xl font-serif text-ink mb-12 leading-[0.9] tracking-tighter uppercase px-4">${blueprint.title}</h1>
+                    <p class="text-xs font-sans tracking-[0.4em] uppercase text-gray-400 mb-8 border-b border-gray-300 pb-2">Pollinations AI Exclusive</p>
+                    <h1 class="text-7xl md:text-[8rem] font-serif text-ink mb-12 leading-[0.85] tracking-tighter uppercase px-4 break-words hyphens-auto">${manuscript.title}</h1>
                     <div class="w-24 h-[1px] bg-ink mb-12"></div>
-                    <p class="text-lg md:text-2xl font-sans font-light text-gray-600 max-w-2xl mx-auto leading-loose px-8">${blueprint.introduction}</p>
+                    <p class="text-lg md:text-2xl font-sans font-light text-gray-600 max-w-2xl mx-auto leading-relaxed px-8">${manuscript.introduction}</p>
                 </div>
             `;
             bookContainer.classList.remove('hidden');
 
-            // THE EDITORIAL PAGES
-            for (let i = 0; i < blueprint.pages.length; i++) {
-                const page = blueprint.pages[i];
-                statusText.innerText = `RENDERING VISUALS: PAGE 0${i + 1} OF 0${blueprint.pages.length}...`;
+            // The Pages Loop
+            for (let i = 0; i < manuscript.pages.length; i++) {
+                const page = manuscript.pages[i];
+                // Safely grab the corresponding prompt, or use a fallback if the AI miscounted
+                const visualConcept = artDirection.image_prompts[i] || `${topic}, ${style}, masterpiece, 8k`;
+                
+                statusText.innerText = `[ RENDERER ] SYNTHESIZING VISUALS: PAGE 0${i + 1} OF 0${manuscript.pages.length}...`;
 
-                // 16:9 Cinematic Aspect Ratio
-                const imgRes = await fetch(`https://gen.pollinations.ai/image/${encodeURIComponent(page.image_prompt)}?model=flux&width=1280&height=720`, {
+                // 16:9 Cinematic Image Render via FLUX
+                const imgRes = await fetch(`https://gen.pollinations.ai/image/${encodeURIComponent(visualConcept)}?model=flux&width=1280&height=720`, {
                     headers: { 'Authorization': `Bearer ${apiKey}` }
                 });
 
-                if(!imgRes.ok) throw new Error("IMAGE RENDER FAILED");
+                if(!imgRes.ok) throw new Error("RENDERER FAILED ON PAGE " + (i+1));
                 const imgUrl = URL.createObjectURL(await imgRes.blob());
 
                 bookContent.innerHTML += `
                     <div class="magazine-page">
                         <div class="mb-16">
                             <p class="text-xs font-sans tracking-[0.3em] uppercase text-gray-400 mb-4 border-b border-gray-200 pb-4">
-                                Section 0${i + 1} &mdash; ${blueprint.title}
+                                Section 0${i + 1} &mdash; ${manuscript.title}
                             </p>
-                            <h2 class="text-5xl md:text-7xl font-serif text-ink mb-12 tracking-tight">${page.page_title}</h2>
-                            <img src="${imgUrl}" alt="Editorial" class="w-full h-[60vh] object-cover bg-gray-100 grayscale-[20%] contrast-125">
+                            <h2 class="text-5xl md:text-7xl font-serif text-ink mb-12 tracking-tight leading-none">${page.page_title}</h2>
+                            <img src="${imgUrl}" alt="Editorial" class="w-full h-[60vh] object-cover bg-gray-100 grayscale-[15%] contrast-110 shadow-sm">
                         </div>
                         <div class="formatted-content">
                             ${page.content}
@@ -386,17 +457,23 @@
                 bookContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
 
-            statusText.innerText = "SEQUENCE COMPLETE. AWAITING EXPORT.";
+            statusText.innerText = "PIPELINE COMPLETE. AWAITING EXPORT.";
+            statusText.classList.remove('pulse-text');
             generateBtn.innerText = "INITIALIZE NEW SEQUENCE";
+            generateBtn.classList.remove('bg-transparent', 'text-white');
+            generateBtn.classList.add('bg-white', 'text-ink');
+            
             setTimeout(fetchAccountData, 3000); 
 
         } catch (err) {
             console.error(err);
-            statusText.innerText = `SYSTEM ERROR: ${err.message}`;
-            generateBtn.innerText = "RETRY INITIALIZATION";
+            statusText.innerText = `SYSTEM HALTED: ${err.message}`;
+            statusText.classList.remove('pulse-text');
+            statusText.classList.add('text-red-500');
+            generateBtn.innerText = "RETRY PIPELINE";
         } finally {
             generateBtn.disabled = false;
-            generateBtn.classList.remove('opacity-50', 'pointer-events-none');
+            generateBtn.classList.remove('pointer-events-none');
         }
     };
     </script>
