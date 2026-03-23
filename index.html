@@ -424,20 +424,33 @@ document.getElementById('pages-count').addEventListener('input', e => {
 // ── HELPERS ────────────────────────────────────────────────
 function parseAIJson(raw) {
   let s = raw.replace(/```json/g,'').replace(/```/g,'').trim();
-  // Extract outermost JSON object
   const a = s.indexOf('{'), b = s.lastIndexOf('}');
   if (a !== -1 && b !== -1) s = s.slice(a, b+1);
-  // Strip JS-style single-line and multi-line comments (DeepSeek sometimes adds these)
+  // Strip JS comments
   s = s.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
-  // Remove trailing commas before } or ] (DeepSeek common mistake)
+  // Remove trailing commas before } or ]
   s = s.replace(/,\s*([\]}])/g, '$1');
-  // Replace smart/curly quotes with straight quotes
-  s = s.replace(/[\u201C\u201D]/g,'"').replace(/[\u2018\u2019]/g,"'");
+  // Fix smart/curly quotes
+  s = s.replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
+  // Escape literal newlines/tabs INSIDE JSON string values (DeepSeek main issue)
+  let fixed = '', inStr = false, esc = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (esc) { fixed += c; esc = false; continue; }
+    if (c === '\\') { fixed += c; esc = true; continue; }
+    if (c === '"') { fixed += c; inStr = !inStr; continue; }
+    if (inStr) {
+      if (c === '\n') { fixed += '\\n'; continue; }
+      if (c === '\r') { fixed += '\\r'; continue; }
+      if (c === '\t') { fixed += '\\t'; continue; }
+    }
+    fixed += c;
+  }
   try {
-    return JSON.parse(s);
+    return JSON.parse(fixed);
   } catch(e) {
-    // Last resort: try to eval as JS object (handles more edge cases)
-    throw new Error('JSON parse failed: ' + e.message + ' — Try regenerating.');
+    console.error('[parseAIJson] Failed. Cleaned:', fixed.slice(0, 800));
+    throw new Error('AI returned malformed data. Please try again.');
   }
 }
 function escHtml(s) {
@@ -558,33 +571,30 @@ async function generateCover() {
 
 // ── REFINED AUTHOR PROMPT ──────────────────────────────────
 function buildAuthorPrompt(topic, style, pages, custom) {
-  return `You are the Editor-in-Chief of a prestigious publication — a hybrid of Vogue, The New Yorker, and Monocle. Your prose is razor-sharp, deeply considered, and carries genuine intellectual weight.
+  return `You are the Editor-in-Chief of a prestigious publication.
 
-TASK: Write a complete ${pages}-page editorial piece on the topic: "${topic}".
+TASK: Write a complete ${pages}-page editorial piece about "${topic}".
 AESTHETIC VOICE: ${style}
-${custom ? `SPECIFIC DIRECTIVES FROM EDITOR: ${custom}\n` : ''}
-QUALITY STANDARDS (non-negotiable):
-- Every paragraph must earn its place. No filler, no cliché, no generic statements.
-- Open each page with a powerful insight or a counterintuitive observation.
+${custom ? `DIRECTIVES: ${custom}\n` : ''}
+QUALITY STANDARDS:
+- Every paragraph must earn its place. No filler, no generic statements.
+- Open each page with a powerful insight or counterintuitive observation.
 - Use specific references, sensory details, and concrete examples.
-- Vary sentence rhythm: mix short declarative punches with long lyrical sentences.
-- Each page must read as a standalone meditation that also serves the whole.
-- Sub-headers (h3) should be evocative fragments, not descriptive titles.
+- Vary sentence rhythm. Each page must read as a standalone meditation.
 
-HTML FORMATTING (use exactly):
-- <p> for all paragraphs
-- <h3> for sub-headers within pages
-- <ul><li> for lists only when essential
-- NO markdown inside HTML values
+FORMATTING:
+- Use <p> for paragraphs, <h3> for sub-headers, <ul><li> for lists.
+- NO markdown, only HTML tags inside content strings.
 
-Return ONLY this exact JSON structure:
-{
-  "title": "A profound, original title — not generic",
-  "introduction": "A 2-3 sentence hook that creates immediate tension or wonder.",
-  "pages": [
-    { "page_title": "Evocative chapter name", "content": "<p>...</p>" }
-  ]
-}`;
+CRITICAL JSON RULES:
+- Return ONLY a valid JSON object, nothing else.
+- ALL string values must be on a SINGLE LINE. Never use literal newlines inside strings.
+- Use proper JSON escaping: write \\n if you need a line break inside a string.
+- Do NOT add trailing commas.
+- Do NOT add comments.
+
+Return this exact structure:
+{"title": "An original title", "introduction": "A 2-3 sentence hook.", "pages": [{"page_title": "Chapter name", "content": "<p>All HTML content on one line like this.</p><p>Next paragraph.</p>"}]}`;
 }
 
 // ── REFINED ART DIRECTOR PROMPT ────────────────────────────
