@@ -431,9 +431,9 @@ function parseAIJson(raw) {
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-// FIX 5: Input sanitization — escape quotes, cap length
+// FIX 5: Input sanitization — strip control chars & dangerous delimiters, cap length
 function sanitize(s) {
-  return String(s).replace(/["\\]/g, m => '\\' + m).slice(0, 500);
+  return String(s).replace(/[\u0000-\u001F"\\`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 500);
 }
 function checkPollen(need, action) {
   if (currentPollenBalance < need) { showPollenErr(`⚠ You need more pollen to ${action}. Balance: ${currentPollenBalance.toFixed(4)}`); return false; }
@@ -479,9 +479,9 @@ async function fetchImgBlob(prompt, oldUrl = null) {
   return URL.createObjectURL(await r.blob());
 }
 
-// FIX 4: chatCompletion with retry + private=true
+// FIX 4: chatCompletion with retry (private is a query param for images only, NOT valid in chat body)
 async function chatCompletion(messages, temperature = 0.5, json = true) {
-  const body = { model: 'openai', messages, temperature, private: true };
+  const body = { model: 'openai', messages, temperature };
   if (json) body.response_format = { type: 'json_object' };
   const r = await fetchWithRetry('https://gen.pollinations.ai/v1/chat/completions', {
     method: 'POST',
