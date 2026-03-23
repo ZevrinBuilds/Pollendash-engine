@@ -102,7 +102,7 @@ audio::-webkit-media-controls-panel{background:#111}
 <div id="tos-modal" class="modal-bg no-print">
   <div class="modal-box">
     <div class="flex items-center gap-3 mb-6">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.5" fill="white"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".6" transform="rotate(0 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".6" transform="rotate(60 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".6" transform="rotate(120 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".5" transform="rotate(180 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".5" transform="rotate(240 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".5" transform="rotate(300 12 12)"/></svg>
+      <img src="https://cdn.jsdelivr.net/gh/pollinations/pollinations@main/assets/logo-white.svg" alt="Pollinations" style="width:22px;height:22px;opacity:.8">
       <h2 class="text-sm font-sans tracking-[.3em] uppercase text-white">AI Editorial Studio</h2>
     </div>
     <h3 class="text-3xl font-serif text-white mb-2">Terms of Service &amp; Usage Agreement</h3>
@@ -148,7 +148,7 @@ audio::-webkit-media-controls-panel{background:#111}
   <div class="flex flex-col items-start">
     <h1 class="text-xs font-sans tracking-[.3em] uppercase text-white font-light">AI Editorial Studio</h1>
     <a href="https://pollinations.ai" target="_blank" class="pol-mark mt-1">
-      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.5" fill="white"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".6" transform="rotate(0 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".6" transform="rotate(60 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".6" transform="rotate(120 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".5" transform="rotate(180 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".5" transform="rotate(240 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".5" transform="rotate(300 12 12)"/></svg>
+      <img src="https://cdn.jsdelivr.net/gh/pollinations/pollinations@main/assets/logo-white.svg" alt="Pollinations" style="width:18px;height:18px;opacity:.65;transition:opacity .3s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.65">
       <span class="text-[.52rem] font-sans tracking-[.2em] uppercase text-white/50">Pollinations AI</span>
     </a>
   </div>
@@ -232,18 +232,6 @@ audio::-webkit-media-controls-panel{background:#111}
         <label class="block text-xs font-sans tracking-[.2em] text-white/40 mb-2 uppercase group-focus-within:text-white">04 — Custom Instructions</label>
         <input type="text" id="custom-instructions" placeholder="e.g. Write in second person, focus on sustainability, avoid clichés" class="luxury-input">
       </div>
-      <!-- Model selector -->
-      <div class="group">
-        <label class="block text-xs font-sans tracking-[.2em] text-white/40 mb-2 uppercase">05 — AI Model</label>
-        <select id="ai-model" class="luxury-input lux-sm bg-transparent cursor-pointer" style="font-size:1.1rem">
-          <option value="openai-large" selected>openai-large — GPT-4o (Recommended)</option>
-          <option value="openai">openai — GPT-4o Mini</option>
-          <option value="mistral">mistral — Mistral Large</option>
-          <option value="gemini">gemini — Gemini Pro</option>
-          <option value="claude-hybridspace">claude — Claude Haiku</option>
-        </select>
-        <p class="text-[.58rem] font-sans text-white/30 mt-2 tracking-wider">If you see a content filter error, switch to mistral or gemini for unrestricted generation.</p>
-      </div>
     </div>
 
     <div class="mt-20 pt-8 text-center flex flex-col items-center">
@@ -274,7 +262,7 @@ audio::-webkit-media-controls-panel{background:#111}
       <button id="audio-btn" class="action-btn" onclick="toggleAudioPanel()">🎧 Audiobook</button>
       <div class="ml-auto flex items-center gap-2">
         <a href="https://pollinations.ai" target="_blank" class="pol-mark">
-          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.5" fill="white"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".6" transform="rotate(0 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".6" transform="rotate(60 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".6" transform="rotate(120 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".5" transform="rotate(180 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".5" transform="rotate(240 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="white" opacity=".5" transform="rotate(300 12 12)"/></svg>
+          <img src="https://cdn.jsdelivr.net/gh/pollinations/pollinations@main/assets/logo-white.svg" alt="Pollinations" style="width:16px;height:16px;opacity:.5">
           <span class="text-[.52rem] font-sans tracking-[.2em] uppercase text-white/40">Pollinations AI</span>
         </a>
       </div>
@@ -327,7 +315,7 @@ audio::-webkit-media-controls-panel{background:#111}
     <footer class="bg-cream border-t border-gray-200 py-14 text-center">
       <div class="flex flex-col items-center gap-4">
         <a href="https://pollinations.ai" target="_blank" class="flex items-center gap-3 group">
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" class="opacity-35 group-hover:opacity-75 transition-opacity"><circle cx="12" cy="12" r="2.5" fill="#0A0A0A"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="#0A0A0A" opacity=".6" transform="rotate(0 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="#0A0A0A" opacity=".6" transform="rotate(60 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="#0A0A0A" opacity=".6" transform="rotate(120 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="#0A0A0A" opacity=".5" transform="rotate(180 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="#0A0A0A" opacity=".5" transform="rotate(240 12 12)"/><ellipse cx="12" cy="6" rx="2" ry="3.5" fill="#0A0A0A" opacity=".5" transform="rotate(300 12 12)"/></svg>
+          <img src="https://cdn.jsdelivr.net/gh/pollinations/pollinations@main/assets/logo-black.svg" alt="Pollinations" style="width:30px;height:30px;opacity:.35;transition:opacity .3s" class="group-hover:opacity-75">
           <span class="font-serif text-2xl text-gray-400 italic group-hover:text-gray-700 transition-colors">Pollinations.ai</span>
         </a>
         <p class="text-[.6rem] font-sans tracking-[.3em] uppercase text-gray-400">Generated with deep gratitude</p>
@@ -497,10 +485,13 @@ async function fetchImgBlob(prompt, oldUrl = null) {
   return URL.createObjectURL(await r.blob());
 }
 
-// chatCompletion reads the user-selected model
-async function chatCompletion(messages, temperature = 0.5, json = true) {
-  const model = document.getElementById('ai-model')?.value || 'openai-large';
-  const body = { model, messages, temperature };
+// chatCompletion: primary model is deepseek (no Azure). Auto-retries with deepseek if ANY model
+// returns an Azure content-filter error (HTTP 400 with "content management policy" in body).
+const PRIMARY_MODEL = 'deepseek';
+const FALLBACK_MODEL = 'mistral';
+
+async function _doChat(model, messages, temperature, json) {
+  const body = { model, messages, temperature, private: false };
   if (json) body.response_format = { type: 'json_object' };
   const r = await fetchWithRetry('https://gen.pollinations.ai/v1/chat/completions', {
     method: 'POST',
@@ -508,7 +499,23 @@ async function chatCompletion(messages, temperature = 0.5, json = true) {
     body: JSON.stringify(body)
   });
   const d = await r.json();
-  return d.choices[0].message.content;
+  // Surface server-level content filter rejections
+  const content = d.choices?.[0]?.message?.content;
+  if (!content) throw new Error(d.error?.message || 'Empty response from model');
+  return content;
+}
+
+async function chatCompletion(messages, temperature = 0.5, json = true) {
+  try {
+    return await _doChat(PRIMARY_MODEL, messages, temperature, json);
+  } catch(e) {
+    const isFilter = /content management policy|filtered|content_filter/i.test(e.message);
+    if (isFilter) {
+      console.warn(`[chatCompletion] Content filter on ${PRIMARY_MODEL}, retrying with ${FALLBACK_MODEL}`);
+      return await _doChat(FALLBACK_MODEL, messages, temperature, json);
+    }
+    throw e;
+  }
 }
 
 // ── COVER GENERATOR ────────────────────────────────────────
