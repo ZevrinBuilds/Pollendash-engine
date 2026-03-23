@@ -102,7 +102,7 @@ audio::-webkit-media-controls-panel{background:#111}
 <div id="tos-modal" class="modal-bg no-print">
   <div class="modal-box">
     <div class="flex items-center gap-3 mb-6">
-      <img src="https://cdn.jsdelivr.net/gh/pollinations/pollinations@main/assets/logo-white.svg" alt="Pollinations" style="width:22px;height:22px;opacity:.8">
+      <img src="https://raw.githubusercontent.com/pollinations/pollinations/main/assets/logo.svg" alt="Pollinations" style="width:22px;height:22px;opacity:.8;filter:invert(1)">
       <h2 class="text-sm font-sans tracking-[.3em] uppercase text-white">AI Editorial Studio</h2>
     </div>
     <h3 class="text-3xl font-serif text-white mb-2">Terms of Service &amp; Usage Agreement</h3>
@@ -148,7 +148,7 @@ audio::-webkit-media-controls-panel{background:#111}
   <div class="flex flex-col items-start">
     <h1 class="text-xs font-sans tracking-[.3em] uppercase text-white font-light">AI Editorial Studio</h1>
     <a href="https://pollinations.ai" target="_blank" class="pol-mark mt-1">
-      <img src="https://cdn.jsdelivr.net/gh/pollinations/pollinations@main/assets/logo-white.svg" alt="Pollinations" style="width:18px;height:18px;opacity:.65;transition:opacity .3s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.65">
+      <img src="https://raw.githubusercontent.com/pollinations/pollinations/main/assets/logo.svg" alt="Pollinations" style="width:18px;height:18px;opacity:.65;filter:invert(1);transition:opacity .3s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.65">
       <span class="text-[.52rem] font-sans tracking-[.2em] uppercase text-white/50">Pollinations AI</span>
     </a>
   </div>
@@ -262,7 +262,7 @@ audio::-webkit-media-controls-panel{background:#111}
       <button id="audio-btn" class="action-btn" onclick="toggleAudioPanel()">🎧 Audiobook</button>
       <div class="ml-auto flex items-center gap-2">
         <a href="https://pollinations.ai" target="_blank" class="pol-mark">
-          <img src="https://cdn.jsdelivr.net/gh/pollinations/pollinations@main/assets/logo-white.svg" alt="Pollinations" style="width:16px;height:16px;opacity:.5">
+      <img src="https://raw.githubusercontent.com/pollinations/pollinations/main/assets/logo.svg" alt="Pollinations" style="width:16px;height:16px;opacity:.5;filter:invert(1)">
           <span class="text-[.52rem] font-sans tracking-[.2em] uppercase text-white/40">Pollinations AI</span>
         </a>
       </div>
@@ -315,7 +315,7 @@ audio::-webkit-media-controls-panel{background:#111}
     <footer class="bg-cream border-t border-gray-200 py-14 text-center">
       <div class="flex flex-col items-center gap-4">
         <a href="https://pollinations.ai" target="_blank" class="flex items-center gap-3 group">
-          <img src="https://cdn.jsdelivr.net/gh/pollinations/pollinations@main/assets/logo-black.svg" alt="Pollinations" style="width:30px;height:30px;opacity:.35;transition:opacity .3s" class="group-hover:opacity-75">
+          <img src="https://raw.githubusercontent.com/pollinations/pollinations/main/assets/logo.svg" alt="Pollinations" style="width:30px;height:30px;opacity:.4;transition:opacity .3s" onmouseover="this.style.opacity=.8" onmouseout="this.style.opacity=.4">
           <span class="font-serif text-2xl text-gray-400 italic group-hover:text-gray-700 transition-colors">Pollinations.ai</span>
         </a>
         <p class="text-[.6rem] font-sans tracking-[.3em] uppercase text-gray-400">Generated with deep gratitude</p>
@@ -424,9 +424,21 @@ document.getElementById('pages-count').addEventListener('input', e => {
 // ── HELPERS ────────────────────────────────────────────────
 function parseAIJson(raw) {
   let s = raw.replace(/```json/g,'').replace(/```/g,'').trim();
+  // Extract outermost JSON object
   const a = s.indexOf('{'), b = s.lastIndexOf('}');
   if (a !== -1 && b !== -1) s = s.slice(a, b+1);
-  return JSON.parse(s);
+  // Strip JS-style single-line and multi-line comments (DeepSeek sometimes adds these)
+  s = s.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
+  // Remove trailing commas before } or ] (DeepSeek common mistake)
+  s = s.replace(/,\s*([\]}])/g, '$1');
+  // Replace smart/curly quotes with straight quotes
+  s = s.replace(/[\u201C\u201D]/g,'"').replace(/[\u2018\u2019]/g,"'");
+  try {
+    return JSON.parse(s);
+  } catch(e) {
+    // Last resort: try to eval as JS object (handles more edge cases)
+    throw new Error('JSON parse failed: ' + e.message + ' — Try regenerating.');
+  }
 }
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
