@@ -232,6 +232,18 @@ audio::-webkit-media-controls-panel{background:#111}
         <label class="block text-xs font-sans tracking-[.2em] text-white/40 mb-2 uppercase group-focus-within:text-white">04 — Custom Instructions</label>
         <input type="text" id="custom-instructions" placeholder="e.g. Write in second person, focus on sustainability, avoid clichés" class="luxury-input">
       </div>
+      <!-- Model selector -->
+      <div class="group">
+        <label class="block text-xs font-sans tracking-[.2em] text-white/40 mb-2 uppercase">05 — AI Model</label>
+        <select id="ai-model" class="luxury-input lux-sm bg-transparent cursor-pointer" style="font-size:1.1rem">
+          <option value="openai-large" selected>openai-large — GPT-4o (Recommended)</option>
+          <option value="openai">openai — GPT-4o Mini</option>
+          <option value="mistral">mistral — Mistral Large</option>
+          <option value="gemini">gemini — Gemini Pro</option>
+          <option value="claude-hybridspace">claude — Claude Haiku</option>
+        </select>
+        <p class="text-[.58rem] font-sans text-white/30 mt-2 tracking-wider">If you see a content filter error, switch to mistral or gemini for unrestricted generation.</p>
+      </div>
     </div>
 
     <div class="mt-20 pt-8 text-center flex flex-col items-center">
@@ -485,9 +497,10 @@ async function fetchImgBlob(prompt, oldUrl = null) {
   return URL.createObjectURL(await r.blob());
 }
 
-// FIX 4: chatCompletion with retry (private is a query param for images only, NOT valid in chat body)
+// chatCompletion reads the user-selected model
 async function chatCompletion(messages, temperature = 0.5, json = true) {
-  const body = { model: 'openai', messages, temperature };
+  const model = document.getElementById('ai-model')?.value || 'openai-large';
+  const body = { model, messages, temperature };
   if (json) body.response_format = { type: 'json_object' };
   const r = await fetchWithRetry('https://gen.pollinations.ai/v1/chat/completions', {
     method: 'POST',
