@@ -15,7 +15,6 @@
     <!-- Navbar -->
     <nav class="bg-indigo-600 text-white p-4 shadow-md flex justify-between items-center no-print">
         <h1 class="text-2xl font-bold">📚 AI E-Book Engine</h1>
-        <!-- FIX: Changed button to an 'a' tag to natively break out of iframes -->
         <a id="auth-btn" class="bg-white text-indigo-600 px-4 py-2 rounded font-bold hover:bg-gray-100 hidden cursor-pointer">
             Connect with Pollinations
         </a>
@@ -47,7 +46,7 @@
             <h2 class="text-xl font-bold mb-4">Orchestrate Your E-Book</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1">Topic</label>
+                    <label class="block text-sm font-medium mb-1">E-Book Topic</label>
                     <input type="text" id="topic" placeholder="e.g. 15-minute viral cooking recipes" class="w-full border p-2 rounded focus:ring-2 focus:ring-indigo-500">
                 </div>
                 <div>
@@ -55,9 +54,10 @@
                     <input type="text" id="style" placeholder="e.g. bright, cinematic, TikTok viral style" class="w-full border p-2 rounded focus:ring-2 focus:ring-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Number of Chapters</label>
-                    <input type="number" id="chapters" value="4" min="1" class="w-full border p-2 rounded focus:ring-2 focus:ring-indigo-500">
-                    <p id="chapter-warning" class="text-xs text-red-500 mt-1 hidden">Exceeds your current pollen balance!</p>
+                    <!-- The User Decides How Many Pages Here -->
+                    <label class="block text-sm font-medium mb-1">Number of Pages</label>
+                    <input type="number" id="pages-count" value="4" min="1" class="w-full border p-2 rounded focus:ring-2 focus:ring-indigo-500">
+                    <p id="page-warning" class="text-xs text-red-500 mt-1 hidden">Exceeds your current pollen balance!</p>
                 </div>
             </div>
             <button id="generate-btn" class="w-full bg-indigo-600 text-white font-bold py-3 rounded shadow hover:bg-indigo-700 transition">
@@ -69,7 +69,7 @@
         <!-- Rendered Book Output -->
         <div id="book-container" class="bg-white p-8 rounded-lg shadow-lg hidden">
             <div class="text-right mb-4 no-print">
-                <button onclick="window.print()" class="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900 text-sm">🖨️ Print / Save as PDF</button>
+                <button onclick="window.print()" class="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900 text-sm font-bold shadow-md">🖨️ Print / Save as PDF</button>
             </div>
             <div id="book-content"></div>
         </div>
@@ -83,8 +83,8 @@
     const userStatus = document.getElementById('user-status');
     const limitsDashboard = document.getElementById('limits-dashboard');
     const maxPagesDisplay = document.getElementById('max-pages-display');
-    const chaptersInput = document.getElementById('chapters');
-    const chapterWarning = document.getElementById('chapter-warning');
+    const pagesInput = document.getElementById('pages-count');
+    const pageWarning = document.getElementById('page-warning');
     const pollenBalanceEl = document.getElementById('pollen-balance');
     const tierBadgeEl = document.getElementById('tier-badge');
     
@@ -95,19 +95,14 @@
     let apiKey = urlHash.get('api_key');
 
     if (apiKey) {
-        // User logged in
         authBtn.classList.add('hidden');
         authWarning.classList.add('hidden');
         appPanel.classList.remove('hidden');
         userStatus.classList.remove('hidden');
         limitsDashboard.classList.remove('hidden');
         window.history.replaceState(null, null, location.pathname);
-        
-        // Fetch Account Data
         fetchAccountData();
     } else {
-        // User needs to log in
-        // If they are in a code compiler preview that uses "about:srcdoc", show a clear error
         if (window.location.protocol === 'about:' || window.location.protocol === 'blob:') {
             authWarning.innerHTML = `
                 <p class="font-bold text-red-600">⚠️ Error: Running in Preview Mode</p>
@@ -118,9 +113,6 @@
             authWarning.classList.replace('border-yellow-500', 'border-red-500');
         } else {
             authBtn.classList.remove('hidden');
-            
-            // FIX: Instead of JS onclick, we configure the HTML link tag directly.
-            // target="_top" forces the browser to break out of compiler iframes.
             const params = new URLSearchParams({
                 redirect_url: window.location.href.split('#')[0],
                 permissions: 'profile,balance'
@@ -132,7 +124,6 @@
 
     async function fetchAccountData() {
         try {
-            // Fetch Balance
             const balRes = await fetch('https://gen.pollinations.ai/account/balance', {
                 headers: { 'Authorization': `Bearer ${apiKey}` }
             });
@@ -141,12 +132,10 @@
             const balance = balData.balance !== undefined ? parseFloat(balData.balance) : parseFloat(balData);
             pollenBalanceEl.innerText = isNaN(balance) ? "0" : balance.toFixed(4);
 
-            // Calculate max pages (Flux costs 0.001 per image)
             maxAllowedPages = isNaN(balance) ? 0 : Math.floor(balance / 0.001);
             maxPagesDisplay.innerText = maxAllowedPages;
-            chaptersInput.max = maxAllowedPages;
+            pagesInput.max = maxAllowedPages;
 
-            // Fetch Profile (for Tier info)
             const profRes = await fetch('https://gen.pollinations.ai/account/profile', {
                 headers: { 'Authorization': `Bearer ${apiKey}` }
             });
@@ -159,13 +148,13 @@
                 }
             }
 
-            chaptersInput.addEventListener('input', (e) => {
+            pagesInput.addEventListener('input', (e) => {
                 if (parseInt(e.target.value) > maxAllowedPages) {
-                    chapterWarning.classList.remove('hidden');
+                    pageWarning.classList.remove('hidden');
                     document.getElementById('generate-btn').disabled = true;
                     document.getElementById('generate-btn').classList.add('opacity-50');
                 } else {
-                    chapterWarning.classList.add('hidden');
+                    pageWarning.classList.add('hidden');
                     document.getElementById('generate-btn').disabled = false;
                     document.getElementById('generate-btn').classList.remove('opacity-50');
                 }
@@ -185,10 +174,10 @@
     generateBtn.onclick = async () => {
         const topic = document.getElementById('topic').value;
         const style = document.getElementById('style').value;
-        const chaptersCount = parseInt(document.getElementById('chapters').value);
+        const pagesCount = parseInt(document.getElementById('pages-count').value);
 
         if(!topic || !style) return alert("Please fill out Topic and Style!");
-        if(chaptersCount > maxAllowedPages) return alert(`You only have enough pollen for ${maxAllowedPages} pages!`);
+        if(pagesCount > maxAllowedPages) return alert(`You only have enough pollen for ${maxAllowedPages} pages!`);
 
         try {
             generateBtn.disabled = true;
@@ -196,19 +185,29 @@
             bookContainer.classList.add('hidden');
             bookContent.innerHTML = '';
 
-            // STEP A: Generate Blueprint
-            statusText.innerText = "✍️ Generating structured JSON blueprint (Cost: ~0.000001 pollen)...";
+            statusText.innerText = "✍️ Brainstorming & Writing (Prompting OpenAI)...";
             
-            const prompt = `Create an e-book about "${topic}". Exactly ${chaptersCount} chapters. Style: "${style}". 
-            JSON ONLY:
+            // ELITE PROMPT ENGINEERING FOR CHATGPT & FLUX
+            const prompt = `You are an elite AI E-Book Architect, Master Copywriter, and Expert Midjourney/Flux Prompt Engineer.
+            Task: Create a highly engaging, high-retention e-book about "${topic}".
+            Constraints: The book MUST have exactly ${pagesCount} pages.
+            Tone & Aesthetic: "${style}".
+
+            For each page, you will write the text content AND design a flawless AI image generation prompt for the FLUX model.
+            RULES FOR IMAGE PROMPTS: 
+            1. Describe the subject, action, environment, camera angle, and lighting in comma-separated tags.
+            2. End the prompt with professional rendering tags (e.g., "masterpiece, 8k resolution, highly detailed, vivid colors, cinematic lighting").
+            3. ABSOLUTELY NO TEXT, NO TYPOGRAPHY, NO WORDS IN THE IMAGE PROMPTS. Flux struggles with text, so do not ask for signs, labels, or words in the image.
+
+            You MUST reply ONLY with a valid JSON object matching this exact structure:
             {
-                "title": "Main Book Title",
-                "introduction": "Short intro.",
-                "chapters":[
+                "title": "A viral, catchy title for the entire book",
+                "introduction": "A compelling hook to start the book.",
+                "pages":[
                     {
-                        "chapter_title": "Title",
-                        "content": "Full chapter content.",
-                        "image_prompt": "Descriptive AI image prompt without text. Style: ${style}"
+                        "page_title": "Engaging Page Title",
+                        "content": "Rich, well-paced storytelling or informative text (2-3 paragraphs minimum).",
+                        "image_prompt": "[Subject], [Action],[Environment], [Lighting], [Aesthetic/Style], masterpiece, highly detailed, 8k"
                     }
                 ]
             }`;
@@ -219,45 +218,56 @@
                 body: JSON.stringify({
                     model: 'openai',
                     messages:[{ role: 'user', content: prompt }],
-                    response_format: { type: "json_object" }
+                    response_format: { type: "json_object" },
+                    temperature: 0.7 // Perfect balance of creativity and structure
                 })
             });
 
             if(!textRes.ok) throw new Error("Failed to generate text blueprint.");
-            const blueprint = JSON.parse((await textRes.json()).choices[0].message.content);
+            
+            const textData = await textRes.json();
+            
+            // Bulletproof JSON Parsing (Strips markdown code blocks if the AI accidentally adds them)
+            let rawJson = textData.choices[0].message.content;
+            rawJson = rawJson.replace(/```json/g, '').replace(/```/g, '').trim();
+            const blueprint = JSON.parse(rawJson);
 
+            // Render Title Page
             bookContent.innerHTML += `
-                <div class="book-page text-center py-20">
-                    <h1 class="text-5xl font-extrabold mb-6 text-indigo-900">${blueprint.title}</h1>
-                    <p class="text-xl text-gray-600 max-w-2xl mx-auto italic">${blueprint.introduction}</p>
+                <div class="book-page text-center py-24 flex flex-col justify-center min-h-[800px]">
+                    <h1 class="text-6xl font-extrabold mb-8 text-indigo-900 leading-tight">${blueprint.title}</h1>
+                    <p class="text-2xl text-gray-600 max-w-3xl mx-auto italic leading-relaxed">${blueprint.introduction}</p>
                 </div>
             `;
             bookContainer.classList.remove('hidden');
 
-            // STEP B: Generate Images
-            for (let i = 0; i < blueprint.chapters.length; i++) {
-                const chapter = blueprint.chapters[i];
-                statusText.innerText = `🖼️ Generating Chapter ${i + 1}/${blueprint.chapters.length} Image (Cost: 0.001 pollen)...`;
+            // Render Each Page with its FLUX Image
+            for (let i = 0; i < blueprint.pages.length; i++) {
+                const page = blueprint.pages[i];
+                statusText.innerText = `🖼️ Painting Page ${i + 1} of ${blueprint.pages.length} (Prompting FLUX AI)...`;
 
-                const imgRes = await fetch(`https://gen.pollinations.ai/image/${encodeURIComponent(chapter.image_prompt)}?model=flux&width=1024&height=512`, {
+                // Calling FLUX image generator with our highly engineered prompt!
+                const imgRes = await fetch(`https://gen.pollinations.ai/image/${encodeURIComponent(page.image_prompt)}?model=flux&width=1024&height=768`, {
                     headers: { 'Authorization': `Bearer ${apiKey}` }
                 });
 
-                if(!imgRes.ok) throw new Error(`Failed to generate image ${i+1}`);
+                if(!imgRes.ok) throw new Error(`Failed to generate image for page ${i+1}`);
                 
                 const imgUrl = URL.createObjectURL(await imgRes.blob());
 
                 bookContent.innerHTML += `
-                    <div class="book-page py-10">
-                        <h2 class="text-3xl font-bold mb-4 text-indigo-800">Chapter ${i + 1}: ${chapter.chapter_title}</h2>
-                        <img src="${imgUrl}" class="w-full h-64 object-cover rounded-lg shadow-md mb-6 border-2 border-indigo-100">
-                        <div class="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap">${chapter.content}</div>
+                    <div class="book-page py-12 max-w-3xl mx-auto">
+                        <h2 class="text-4xl font-bold mb-6 text-indigo-800 border-b-2 border-indigo-100 pb-2">Page ${i + 1}: ${page.page_title}</h2>
+                        <img src="${imgUrl}" alt="Illustration" class="w-full h-[500px] object-cover rounded-xl shadow-2xl mb-8 border-4 border-white">
+                        <div class="text-xl text-gray-800 leading-loose whitespace-pre-wrap">${page.content}</div>
                     </div>
                 `;
+                
+                // Auto-scroll so the user sees the magic happening
                 window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             }
 
-            statusText.innerText = "✨ E-Book Orchestration Complete! Your balance will update shortly.";
+            statusText.innerText = "✨ E-Book Masterpiece Complete! Click 'Print / Save as PDF' to download.";
             setTimeout(fetchAccountData, 3000); 
 
         } catch (err) {
