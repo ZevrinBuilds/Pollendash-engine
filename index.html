@@ -249,6 +249,15 @@
     </video>
     <div class="video-overlay no-print"></div>
 
+    <!-- Audiobook Player (Floating) -->
+    <div id="audio-player-container" class="hidden fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2 bg-ink/90 backdrop-blur-md border border-white/20 p-4 rounded-3xl shadow-2xl transition-all duration-500 transform translate-y-10 opacity-0 min-w-[160px] no-print">
+        <button id="audio-close-btn" class="absolute top-2 right-3 text-white/50 hover:text-white transition-colors text-lg focus:outline-none">&times;</button>
+        <button id="audio-play-btn" class="w-16 h-16 rounded-full border border-white/30 flex items-center justify-center text-white text-[2rem] hover:bg-white/10 transition-all outline-none leading-none">
+            ⏸️
+        </button>
+        <div id="audio-time-display" class="text-[0.65rem] font-sans tracking-[0.2em] text-white/70 uppercase">00:00 / 00:00</div>
+    </div>
+
     <!-- Terms of Service Modal -->
     <div id="tos-modal"
         class="hidden fixed inset-0 z-[100] bg-black/90 flex justify-center items-center backdrop-blur-sm p-4">
@@ -507,6 +516,88 @@
         window.currentStyle = "";
         window.currentCustom = "";
 
+        // Audiobook State
+        let globalAudio = null;
+        let audioUpdateInterval = null;
+
+        function formatTime(seconds) {
+            if (isNaN(seconds) || !isFinite(seconds)) return "00:00";
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function cleanupAudio() {
+            if (globalAudio) {
+                globalAudio.pause();
+                globalAudio.currentTime = 0;
+                URL.revokeObjectURL(globalAudio.src);
+                globalAudio = null;
+            }
+            if (audioUpdateInterval) {
+                clearInterval(audioUpdateInterval);
+                audioUpdateInterval = null;
+            }
+        }
+
+        function hideAudioPlayer() {
+            cleanupAudio();
+            const container = document.getElementById('audio-player-container');
+            container.classList.add('translate-y-10', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                container.classList.add('hidden');
+                container.classList.remove('pointer-events-none');
+            }, 500);
+        }
+
+        function initAudioPlayer(audioUrl) {
+            cleanupAudio();
+
+            globalAudio = new Audio(audioUrl);
+            
+            const container = document.getElementById('audio-player-container');
+            const playBtn = document.getElementById('audio-play-btn');
+            const timeDisplay = document.getElementById('audio-time-display');
+            
+            container.classList.remove('hidden');
+            // trigger reflow
+            void container.offsetWidth;
+            container.classList.remove('translate-y-10', 'opacity-0');
+
+            playBtn.innerText = "⏸️";
+            timeDisplay.innerText = "00:00 / 00:00";
+
+            globalAudio.play();
+
+            playBtn.onclick = () => {
+                if (globalAudio.paused) {
+                    globalAudio.play();
+                    playBtn.innerText = "⏸️";
+                } else {
+                    globalAudio.pause();
+                    playBtn.innerText = "▶️";
+                }
+            };
+
+            globalAudio.onloadedmetadata = () => {
+                timeDisplay.innerText = formatTime(globalAudio.currentTime) + " / " + formatTime(globalAudio.duration);
+            };
+
+            globalAudio.onended = () => {
+                playBtn.innerText = "▶️";
+                globalAudio.currentTime = 0;
+                timeDisplay.innerText = "00:00 / " + formatTime(globalAudio.duration);
+            };
+
+            audioUpdateInterval = setInterval(() => {
+                if (globalAudio && !globalAudio.paused && !isNaN(globalAudio.duration)) {
+                    timeDisplay.innerText = formatTime(globalAudio.currentTime) + " / " + formatTime(globalAudio.duration);
+                }
+            }, 500);
+        }
+
+        document.getElementById('audio-close-btn').onclick = hideAudioPlayer;
+
         const authBtn = document.getElementById('auth-btn');
         const authWarning = document.getElementById('auth-warning');
         const appWrapper = document.getElementById('app-wrapper');
@@ -537,6 +628,7 @@
 
         // Feature: Back to setup
         document.getElementById('back-btn').onclick = () => {
+            hideAudioPlayer();
             workspaceContainer.classList.add('hidden');
             mainView.classList.remove('hidden');
         };
@@ -1140,8 +1232,8 @@
                 // Combine all sequentially ordered chunks into a seamless buffer
                 const finalBlob = new Blob(audioBlobs, { type: "audio/mpeg" });
                 const audioUrl = URL.createObjectURL(finalBlob);
-                const audio = new Audio(audioUrl);
-                audio.play();
+                
+                initAudioPlayer(audioUrl); // Play the newly generated audiobook
 
                 showGlobalError("AUDIOBOOK MATRIX COMPLETE");
                 setTimeout(fetchAccountData, 2000);
@@ -1159,4 +1251,4 @@
     </script>
 </body>
 
-</html>
+</html> 
