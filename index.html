@@ -409,6 +409,17 @@
                         class="text-[0.65rem] font-sans tracking-widest text-red-500 mt-4 hidden uppercase">Insufficient
                         Pollen Balance for this request</p>
                 </div>
+
+                <!-- Input 5 (Cover Art) -->
+                <div class="group">
+                    <label
+                        class="block text-xs font-sans tracking-[0.2em] text-white/40 mb-2 uppercase transition-colors group-focus-within:text-white flex items-center justify-between">
+                        <span>05 &mdash; Cover Art Concept</span>
+                        <span class="text-[0.6rem] tracking-widest text-white/50 border border-white/20 px-2 py-0.5 ml-3 bg-white/5 inline-block">OPTIONAL</span>
+                    </label>
+                    <input type="text" id="cover-concept" placeholder="e.g. A minimalist geometric shape in deep red"
+                        class="luxury-input">
+                </div>
             </div>
 
             <!-- Generate Action -->
@@ -512,6 +523,7 @@
         // Abstract application state
         window.currentManuscript = null;
         window.currentImages = [];
+        window.currentCoverImage = null;
         window.currentTopic = "";
         window.currentStyle = "";
         window.currentCustom = "";
@@ -787,11 +799,14 @@
         function renderBookView() {
             if (!window.currentManuscript) return;
 
+            const coverHtml = window.currentCoverImage ? `<img src="${window.currentCoverImage}" alt="Cover Art" class="w-full max-w-2xl h-auto mb-16 shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-sm">` : '';
+
             let html = `
             <div class="magazine-page flex flex-col justify-center items-center text-center px-4">
                 <p class="text-[0.65rem] font-sans tracking-[0.4em] uppercase text-gray-500 mb-8 border-b border-gray-300 pb-2 font-semibold">Pollinations AI Exclusive</p>
                 <h1 class="text-6xl md:text-[8rem] font-serif text-ink mb-12 leading-[0.85] tracking-tighter uppercase px-4 break-words hyphens-auto w-full">${window.currentManuscript.title}</h1>
                 <div class="w-24 h-[1px] bg-ink mb-12"></div>
+                ${coverHtml}
                 <p class="text-lg md:text-2xl font-sans font-light text-gray-600 max-w-2xl mx-auto leading-relaxed px-4 md:px-8">${window.currentManuscript.introduction}</p>
             </div>
         `;
@@ -831,6 +846,7 @@
             const topic = document.getElementById('topic').value;
             const style = document.getElementById('style').value;
             const customInstr = document.getElementById('custom-instructions').value;
+            const coverConcept = document.getElementById('cover-concept').value;
             const pagesCount = parseInt(document.getElementById('pages-count').value);
 
             if (!topic || !style) {
@@ -838,7 +854,10 @@
                 return;
             }
 
-            if (!checkBalance('generate_base', pagesCount)) return;
+            let totalPagesCost = pagesCount;
+            if (coverConcept) totalPagesCost += 1;
+
+            if (!checkBalance('generate_base', totalPagesCost)) return;
 
             try {
                 generateBtn.disabled = true;
@@ -941,6 +960,22 @@
 
                     if (!imgRes.ok) throw new Error("RENDERER FAILED ON PAGE " + (i + 1));
                     window.currentImages.push(URL.createObjectURL(await imgRes.blob()));
+                }
+
+                if (coverConcept) {
+                    statusText.innerText = "[ RENDERER ] SYNTHESIZING COVER ART...";
+                    const coverPrompt = `${coverConcept}, ${style}, minimalist abstract book cover, high-end editorial graphic design, masterpiece, 8k`;
+                    const coverRes = await fetch(`https://gen.pollinations.ai/image/${encodeURIComponent(coverPrompt)}?model=flux&width=1024&height=1024`, {
+                        headers: { 'Authorization': `Bearer ${apiKey}` }
+                    });
+                    if (coverRes.ok) {
+                        window.currentCoverImage = URL.createObjectURL(await coverRes.blob());
+                    } else {
+                        window.currentCoverImage = null;
+                        showGlobalError("Cover Art synthesis failed. Proceeding without cover.");
+                    }
+                } else {
+                    window.currentCoverImage = null;
                 }
 
                 statusText.innerText = "PIPELINE COMPLETE. TRANSITIONING VIEWPORT.";
